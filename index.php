@@ -34,37 +34,35 @@
     <section class="hero-slider" id="home">
         <div class="slider-container">
 
-            <!-- Slide 1 -->
-            <div class="slide active">
-                <a href="#about">
-                    <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1">
-                </a>
-                <div class="slide-content">
-                    <h1>Mabuhay, <a href="#about" class="hero-highlight">Welcome!</a></h1>
-                    <div class="buttons">
-                        <a href="#features" class="btn btn-primary">Get Started</a>
-                        <a href="#about" class="btn btn-secondary">Learn More</a>
-                    </div>
+            <!-- Persistent Overlay Content -->
+            <div class="slide-content-overlay">
+                <h1>Mabuhay, <a href="#about" class="hero-highlight">Welcome!</a></h1>
+                <p>We build modern, fast, and responsive digital solutions designed to elevate your online presence.</p>
+                <div class="buttons">
+                    <a href="#features" class="btn btn-primary">Get Started</a>
+                    <a href="#about" class="btn btn-secondary">Learn More</a>
                 </div>
             </div>
 
-            <!-- Slide 2 -->
+            <!-- Slide 1 Background -->
+            <div class="slide active">
+                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1">
+            </div>
+
+            <!-- Slide 2 Background -->
             <div class="slide">
-                <a href="#features">
-                    <img src="Images/OutsideClinic.JPEG" alt="Slide 2">
-                </a>
-                <div class="slide-content">
-                    <h1>Fast & <a href="#features" class="hero-highlight">Modern.</a></h1>
-                    <p>Optimized code that loads quickly on desktop and mobile devices. Click the image for features.</p>
-                    <div class="buttons">
-                        <a href="#features" class="btn btn-primary">View Features</a>
-                    </div>
-                </div>
+                <img src="Images/OutsideClinic.JPEG" alt="Slide 2">
             </div>
 
             <!-- Navigation Controls -->
-            <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)">&#10094;</a>
-            <a class="next" role="button" tabindex="0" onclick="changeSlide(1)">&#10095;</a>
+            <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)" aria-label="Previous Slide">&#10094;</a>
+            <a class="next" role="button" tabindex="0" onclick="changeSlide(1)" aria-label="Next Slide">&#10095;</a>
+
+            <!-- Slider Dots -->
+            <div class="slider-dots">
+                <span class="dot active" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+            </div>
 
         </div>
     </section>
