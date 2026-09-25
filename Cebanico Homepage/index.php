@@ -18,7 +18,7 @@
         <div class="container">
             <nav>
                 <a href="#" class="logo">
-                    <img src="imgs/1.jpg" alt="MyWebsite Logo">
+                    <img src="Images/PRIMARY-LOGO.png" alt="MyWebsite Logo">
                 </a>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
@@ -37,7 +37,7 @@
             <!-- Slide 1 -->
             <div class="slide active">
                 <a href="#about">
-                    <img src="https://placehold.co/1200x600/eff6ff/111827?text=Click+to+view+About" alt="Slide 1">
+                    <img src="Images/FrontDesk.JPEG" alt="Slide 1">
                 </a>
                 <div class="slide-content">
                     <h1>Build Something <a href="#about" class="hero-highlight">Awesome.</a></h1>
