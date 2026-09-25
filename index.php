@@ -37,11 +37,10 @@
             <!-- Slide 1 -->
             <div class="slide active">
                 <a href="#about">
-                    <img src="Images/FrontDesk.JPEG" alt="Slide 1">
+                    <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1">
                 </a>
                 <div class="slide-content">
-                    <h1>Build Something <a href="#about" class="hero-highlight">Awesome.</a></h1>
-                    <p>A clean and modern website built with PHP, HTML, and CSS. Click the image to learn more.</p>
+                    <h1>Mabuhay, <a href="#about" class="hero-highlight">Welcome!</a></h1>
                     <div class="buttons">
                         <a href="#features" class="btn btn-primary">Get Started</a>
                         <a href="#about" class="btn btn-secondary">Learn More</a>
@@ -52,7 +51,7 @@
             <!-- Slide 2 -->
             <div class="slide">
                 <a href="#features">
-                    <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Features" alt="Slide 2">
+                    <img src="Images/OutsideClinic.JPEG" alt="Slide 2">
                 </a>
                 <div class="slide-content">
                     <h1>Fast & <a href="#features" class="hero-highlight">Modern.</a></h1>
