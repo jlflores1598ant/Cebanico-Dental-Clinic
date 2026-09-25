@@ -1,5 +1,62 @@
 <?php
-// Static homepage
+// Define our services in a PHP array for easy maintenance
+$services = [
+    [
+        "title" => "Consultation",
+        "desc" => "Comprehensive dental checkup, x-ray reviews, and personalized treatment planning to ensure your optimal oral health.",
+        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Consultation"
+    ],
+    [
+        "title" => "Oral Prophylaxis (Cleaning)",
+        "desc" => "Professional teeth cleaning to remove plaque, tartar, and stains, preventing cavities and gum disease.",
+        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Cleaning"
+    ],
+    [
+        "title" => "Tooth Extraction (Bunot)",
+        "desc" => "Safe and painless removal of damaged, severely decayed, or problematic teeth, including wisdom teeth extraction.",
+        "img" => "https://placehold.co/800x600/1e3a8a/ffffff?text=Extraction"
+    ],
+    [
+        "title" => "Surgery",
+        "desc" => "Advanced minor oral surgeries including impacted wisdom tooth removal, bone grafting, and gingivectomy.",
+        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Surgery"
+    ],
+    [
+        "title" => "Tooth Restoration (Pasta)",
+        "desc" => "High-quality tooth-colored composite fillings to repair cavities, chipped teeth, and restore your natural smile.",
+        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Restoration"
+    ],
+    [
+        "title" => "Dentures (Pustiso)",
+        "desc" => "Custom-fitted removable partial or complete dentures to replace missing teeth and restore chewing function.",
+        "img" => "https://placehold.co/800x600/1e3a8a/ffffff?text=Dentures"
+    ],
+    [
+        "title" => "Teeth Whitening",
+        "desc" => "Professional bleaching treatments to safely and effectively brighten discolored or stained teeth.",
+        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Whitening"
+    ],
+    [
+        "title" => "Braces Installation",
+        "desc" => "Orthodontic treatment setup using metal or ceramic brackets to correct misaligned teeth and bite issues.",
+        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Braces+Install"
+    ],
+    [
+        "title" => "Braces Adjustment",
+        "desc" => "Routine orthodontic tightening and wire replacements to ensure continuous progress in your teeth alignment.",
+        "img" => "https://placehold.co/800x600/1e3a8a/ffffff?text=Braces+Adjust"
+    ],
+    [
+        "title" => "Root Canal Treatment",
+        "desc" => "Endodontic therapy to save severely infected or decaying teeth by cleaning out the infected pulp and sealing it.",
+        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Root+Canal"
+    ],
+    [
+        "title" => "Fixed Bridge - Tooth Preparation",
+        "desc" => "Preparation and placement of permanent prosthetic bridges to seamlessly fill the gaps left by missing teeth.",
+        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Fixed+Bridge"
+    ]
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,7 +79,7 @@
                 </a>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
-                    <li><a href="#features">Features</a></li>
+                    <li><a href="#services">Services</a></li>
                     <li><a href="#about">About</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
@@ -33,6 +90,18 @@
     <!-- Hero Slider -->
     <section class="hero-slider" id="home">
         <div class="slider-container">
+            <!-- Slide 1 -->
+            <div class="slide active">
+                <a href="#about">
+                    <img src="Images/FrontDesk.JPEG" alt="Slide 1" onerror="this.src='https://placehold.co/1200x600/eff6ff/111827?text=Welcome+to+Our+Clinic'">
+                </a>
+                <div class="slide-content">
+                    <h1>Build Something <a href="#about" class="hero-highlight">Awesome.</a></h1>
+                    <p>A clean and modern website built with PHP, HTML, and CSS. Click the image to learn more.</p>
+                    <div class="buttons">
+                        <a href="#services" class="btn btn-primary">Get Started</a>
+                        <a href="#about" class="btn btn-secondary">Learn More</a>
+                    </div>
 
             <!-- Persistent Overlay Content -->
             <div class="slide-content-overlay">
@@ -51,6 +120,21 @@
 
             <!-- Slide 2 Background -->
             <div class="slide">
+                <a href="#services">
+                    <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Services" alt="Slide 2">
+                </a>
+                <div class="slide-content">
+                    <h1>Fast & <a href="#services" class="hero-highlight">Modern.</a></h1>
+                    <p>Optimized code that loads quickly on desktop and mobile devices. Click the image for our services.</p>
+                    <div class="buttons">
+                        <a href="#services" class="btn btn-primary">View Services</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Controls -->
+            <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)">&#10094;</a>
+            <a class="next" role="button" tabindex="0" onclick="changeSlide(1)">&#10095;</a>
                 <img src="Images/OutsideClinic.JPEG" alt="Slide 2">
             </div>
 
@@ -67,32 +151,48 @@
         </div>
     </section>
 
-    <!-- Features -->
-    <section class="features" id="features">
+    <!-- Services Section (Infinite 3D Carousel) -->
+    <section class="services" id="services">
         <div class="container">
             <div class="section-title">
-                <h2>Why Choose Us?</h2>
-                <p>Everything you need to create a great online presence.</p>
+                <h2>Our Services</h2>
+                <p>Click on any side image to bring it to the center. Click the center image to view its description.</p>
             </div>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">🚀</div>
-                    <h3>Fast</h3>
-                    <p>Lightweight and optimized code that loads quickly on desktop and mobile devices.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🎨</div>
-                    <h3>Modern Design</h3>
-                    <p>A clean and professional design that can easily be customized.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">📱</div>
-                    <h3>Responsive</h3>
-                    <p>Looks great on phones, tablets, laptops, and desktop screens.</p>
-                </div>
+            
+            <div class="carousel-container" id="servicesCarousel">
+                
+                <?php 
+                foreach ($services as $index => $service) { 
+                    $safeTitle = htmlspecialchars($service['title'], ENT_QUOTES);
+                    $safeDesc = htmlspecialchars($service['desc'], ENT_QUOTES);
+                ?>
+                    <div class="carousel-item" onclick="handleCarouselClick(<?php echo $index; ?>, '<?php echo $safeTitle; ?>', '<?php echo $safeDesc; ?>')">
+                        <div class="carousel-inner">
+                            <img src="<?php echo $service['img']; ?>" alt="<?php echo $service['title']; ?>">
+                            <div class="carousel-overlay">
+                                <h3><?php echo $service['title']; ?></h3>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+                
+            </div>
+            
+            <div class="carousel-controls">
+                <button onclick="navigateCarousel(-1)"><span>&#10094;</span> Prev</button>
+                <button onclick="navigateCarousel(1)">Next <span>&#10095;</span></button>
             </div>
         </div>
     </section>
+
+    <!-- Modal for Service Descriptions -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Service Title</h2>
+            <p id="modalDesc">Service description goes here.</p>
+        </div>
+    </div>
 
     <!-- About -->
     <section class="about" id="about">
@@ -104,47 +204,29 @@
         </div>
     </section>
 
-    <!-- Contact / CTA -->
-    <section class="cta" id="contact">
+    <!-- Compact Contact / Footer -->
+    <footer id="contact">
         <div class="container">
-            <h2>Get in Touch</h2>
-            <p>Have questions or ready to get started? Reach out to us below.</p>
-
-            <div class="contact-info">
-                <div class="contact-card">
-                    <div class="contact-icon">📍</div>
-                    <h3>Our Address</h3>
-                    <p>
-                        123 Business Street, Suite 400<br>
-                        New York, NY 10001
-                    </p>
+            <div class="footer-top">
+                <div class="footer-info">
+                    <h3>Get in Touch</h3>
+                    <p>Have questions or ready to get started? Reach out to us.</p>
                 </div>
-                <div class="contact-card">
-                    <div class="contact-icon">📞</div>
-                    <h3>Call Us</h3>
-                    <p>
-                        Main: <a href="tel:+11234567890">+1 (123) 456-7890</a><br>
-                        Support: <a href="tel:+10987654321">+1 (098) 765-4321</a>
-                    </p>
-                </div>
-                <div class="contact-card">
-                    <div class="contact-icon">✉️</div>
-                    <h3>Email Us</h3>
-                    <p>
-                        <a href="mailto:hello@example.com">hello@example.com</a><br>
-                        <a href="mailto:support@example.com">support@example.com</a>
-                    </p>
+                <div class="footer-contact-links">
+                    <div class="contact-item">
+                        <span>📍</span> 123 Business St, New York, NY 10001
+                    </div>
+                    <div class="contact-item">
+                        <span>📞</span> <a href="tel:+11234567890">+1 (123) 456-7890</a>
+                    </div>
+                    <div class="contact-item">
+                        <span>✉️</span> <a href="mailto:hello@example.com">hello@example.com</a>
+                    </div>
                 </div>
             </div>
-
-            <a href="mailto:hello@example.com" class="btn">Send an Email</a>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; <?php echo date("Y"); ?> MyWebsite. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> MyWebsite. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
