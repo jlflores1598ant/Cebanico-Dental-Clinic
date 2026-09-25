@@ -9,7 +9,7 @@
     <title>My Website</title>
     
     <!-- Link to external CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -79,17 +79,17 @@
             </div>
             <div class="feature-grid">
                 <div class="feature-card">
-                    <div class="icon"></div>
+                    <div class="icon">🚀</div>
                     <h3>Fast</h3>
                     <p>Lightweight and optimized code that loads quickly on desktop and mobile devices.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon"></div>
+                    <div class="icon">🎨</div>
                     <h3>Modern Design</h3>
                     <p>A clean and professional design that can easily be customized.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon"></div>
+                    <div class="icon">📱</div>
                     <h3>Responsive</h3>
                     <p>Looks great on phones, tablets, laptops, and desktop screens.</p>
                 </div>
@@ -115,7 +115,7 @@
 
             <div class="contact-info">
                 <div class="contact-card">
-                    <div class="contact-icon"></div>
+                    <div class="contact-icon">📍</div>
                     <h3>Our Address</h3>
                     <p>
                         123 Business Street, Suite 400<br>
@@ -123,7 +123,7 @@
                     </p>
                 </div>
                 <div class="contact-card">
-                    <div class="contact-icon"></div>
+                    <div class="contact-icon">📞</div>
                     <h3>Call Us</h3>
                     <p>
                         Main: <a href="tel:+11234567890">+1 (123) 456-7890</a><br>
@@ -131,7 +131,7 @@
                     </p>
                 </div>
                 <div class="contact-card">
-                    <div class="contact-icon"></div>
+                    <div class="contact-icon">✉️</div>
                     <h3>Email Us</h3>
                     <p>
                         <a href="mailto:hello@example.com">hello@example.com</a><br>
