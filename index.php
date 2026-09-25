@@ -87,55 +87,28 @@ $services = [
         </div>
     </header>
 
-    <!-- Hero Slider -->
+    <!-- Merged Hero Slider -->
     <section class="hero-slider" id="home">
         <div class="slider-container">
-            <!-- Slide 1 -->
-            <div class="slide active">
-                <a href="#about">
-                    <img src="Images/FrontDesk.JPEG" alt="Slide 1" onerror="this.src='https://placehold.co/1200x600/eff6ff/111827?text=Welcome+to+Our+Clinic'">
-                </a>
-                <div class="slide-content">
-                    <h1>Build Something <a href="#about" class="hero-highlight">Awesome.</a></h1>
-                    <p>A clean and modern website built with PHP, HTML, and CSS. Click the image to learn more.</p>
-                    <div class="buttons">
-                        <a href="#services" class="btn btn-primary">Get Started</a>
-                        <a href="#about" class="btn btn-secondary">Learn More</a>
-                    </div>
 
             <!-- Persistent Overlay Content -->
             <div class="slide-content-overlay">
                 <h1>Mabuhay, <a href="#about" class="hero-highlight">Welcome!</a></h1>
                 <p>We build modern, fast, and responsive digital solutions designed to elevate your online presence.</p>
                 <div class="buttons">
-                    <a href="#features" class="btn btn-primary">Get Started</a>
+                    <a href="#services" class="btn btn-primary">Get Started</a>
                     <a href="#about" class="btn btn-secondary">Learn More</a>
                 </div>
             </div>
 
             <!-- Slide 1 Background -->
             <div class="slide active">
-                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1">
+                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1" onerror="this.src='https://placehold.co/1200x800/0f172a/ffffff?text=Slide+1'">
             </div>
 
             <!-- Slide 2 Background -->
             <div class="slide">
-                <a href="#services">
-                    <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Services" alt="Slide 2">
-                </a>
-                <div class="slide-content">
-                    <h1>Fast & <a href="#services" class="hero-highlight">Modern.</a></h1>
-                    <p>Optimized code that loads quickly on desktop and mobile devices. Click the image for our services.</p>
-                    <div class="buttons">
-                        <a href="#services" class="btn btn-primary">View Services</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Controls -->
-            <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)">&#10094;</a>
-            <a class="next" role="button" tabindex="0" onclick="changeSlide(1)">&#10095;</a>
-                <img src="Images/OutsideClinic.JPEG" alt="Slide 2">
+                <img src="Images/OutsideClinic.JPEG" alt="Slide 2" onerror="this.src='https://placehold.co/1200x800/1e293b/ffffff?text=Slide+2'">
             </div>
 
             <!-- Navigation Controls -->
