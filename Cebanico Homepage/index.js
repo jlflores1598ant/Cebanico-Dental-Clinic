@@ -16,8 +16,8 @@ function showSlides(n) {
     let slides = document.getElementsByClassName("slide");
     
     // Loop back to first/last slide
-    if (n > slides.length) {slideIndex = 1}
-    if (n < 1) {slideIndex = slides.length}
+    if (n > slides.length) { slideIndex = 1; }
+    if (n < 1) { slideIndex = slides.length; }
     
     // Hide all slides
     for (i = 0; i < slides.length; i++) {

@@ -37,7 +37,7 @@
             <!-- Slide 1 -->
             <div class="slide active">
                 <a href="#about">
-                    <img src="https://via.placeholder.com/1200x600/eff6ff/111827?text=Click+to+view+About" alt="Slide 1">
+                    <img src="https://placehold.co/1200x600/eff6ff/111827?text=Click+to+view+About" alt="Slide 1">
                 </a>
                 <div class="slide-content">
                     <h1>Build Something <a href="#about" class="hero-highlight">Awesome.</a></h1>
@@ -52,7 +52,7 @@
             <!-- Slide 2 -->
             <div class="slide">
                 <a href="#features">
-                    <img src="https://via.placeholder.com/1200x600/dbeafe/111827?text=Click+to+view+Features" alt="Slide 2">
+                    <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Features" alt="Slide 2">
                 </a>
                 <div class="slide-content">
                     <h1>Fast & <a href="#features" class="hero-highlight">Modern.</a></h1>
