@@ -152,7 +152,7 @@
     </footer>
 
     <!-- Link to external JavaScript -->
-    <script src="script.js"></script>
+    <script src="index.js"></script>
 
 </body>
 </html>
