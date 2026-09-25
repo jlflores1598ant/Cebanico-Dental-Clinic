@@ -18,7 +18,7 @@
         <div class="container">
             <nav>
                 <a href="#" class="logo">
-                    <img src="imgs/1.jpg" alt="MyWebsite Logo">
+                    <img src="Images/PRIMARY-LOGO.png" alt="MyWebsite Logo">
                 </a>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
