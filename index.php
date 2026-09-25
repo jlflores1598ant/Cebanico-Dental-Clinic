@@ -102,10 +102,23 @@ $services = [
                         <a href="#services" class="btn btn-primary">Get Started</a>
                         <a href="#about" class="btn btn-secondary">Learn More</a>
                     </div>
+
+            <!-- Persistent Overlay Content -->
+            <div class="slide-content-overlay">
+                <h1>Mabuhay, <a href="#about" class="hero-highlight">Welcome!</a></h1>
+                <p>We build modern, fast, and responsive digital solutions designed to elevate your online presence.</p>
+                <div class="buttons">
+                    <a href="#features" class="btn btn-primary">Get Started</a>
+                    <a href="#about" class="btn btn-secondary">Learn More</a>
                 </div>
             </div>
 
-            <!-- Slide 2 -->
+            <!-- Slide 1 Background -->
+            <div class="slide active">
+                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1">
+            </div>
+
+            <!-- Slide 2 Background -->
             <div class="slide">
                 <a href="#services">
                     <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Services" alt="Slide 2">
@@ -122,6 +135,19 @@ $services = [
             <!-- Navigation Controls -->
             <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)">&#10094;</a>
             <a class="next" role="button" tabindex="0" onclick="changeSlide(1)">&#10095;</a>
+                <img src="Images/OutsideClinic.JPEG" alt="Slide 2">
+            </div>
+
+            <!-- Navigation Controls -->
+            <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)" aria-label="Previous Slide">&#10094;</a>
+            <a class="next" role="button" tabindex="0" onclick="changeSlide(1)" aria-label="Next Slide">&#10095;</a>
+
+            <!-- Slider Dots -->
+            <div class="slider-dots">
+                <span class="dot active" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+            </div>
+
         </div>
     </section>
 
