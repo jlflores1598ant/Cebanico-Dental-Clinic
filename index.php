@@ -22,7 +22,7 @@
                 </a>
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
-                    <li><a href="#features">Features</a></li>
+                    <li><a href="#services">Services</a></li>
                     <li><a href="#about">About</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
@@ -43,7 +43,7 @@
                     <h1>Build Something <a href="#about" class="hero-highlight">Awesome.</a></h1>
                     <p>A clean and modern website built with PHP, HTML, and CSS. Click the image to learn more.</p>
                     <div class="buttons">
-                        <a href="#features" class="btn btn-primary">Get Started</a>
+                        <a href="#services" class="btn btn-primary">Get Started</a>
                         <a href="#about" class="btn btn-secondary">Learn More</a>
                     </div>
                 </div>
@@ -51,14 +51,14 @@
 
             <!-- Slide 2 -->
             <div class="slide">
-                <a href="#features">
-                    <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Features" alt="Slide 2">
+                <a href="#services">
+                    <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Services" alt="Slide 2">
                 </a>
                 <div class="slide-content">
-                    <h1>Fast & <a href="#features" class="hero-highlight">Modern.</a></h1>
-                    <p>Optimized code that loads quickly on desktop and mobile devices. Click the image for features.</p>
+                    <h1>Fast & <a href="#services" class="hero-highlight">Modern.</a></h1>
+                    <p>Optimized code that loads quickly on desktop and mobile devices. Click the image for our services.</p>
                     <div class="buttons">
-                        <a href="#features" class="btn btn-primary">View Features</a>
+                        <a href="#services" class="btn btn-primary">View Services</a>
                     </div>
                 </div>
             </div>
@@ -70,11 +70,11 @@
         </div>
     </section>
 
-    <!-- Features -->
-    <section class="features" id="features">
+    <!-- Services (Previously Features) -->
+    <section class="features" id="services">
         <div class="container">
             <div class="section-title">
-                <h2>Why Choose Us?</h2>
+                <h2>Our Services</h2>
                 <p>Everything you need to create a great online presence.</p>
             </div>
             <div class="feature-grid">
@@ -107,47 +107,29 @@
         </div>
     </section>
 
-    <!-- Contact / CTA -->
-    <section class="cta" id="contact">
+    <!-- Compact Contact / Footer -->
+    <footer id="contact">
         <div class="container">
-            <h2>Get in Touch</h2>
-            <p>Have questions or ready to get started? Reach out to us below.</p>
-
-            <div class="contact-info">
-                <div class="contact-card">
-                    <div class="contact-icon">📍</div>
-                    <h3>Our Address</h3>
-                    <p>
-                        123 Business Street, Suite 400<br>
-                        New York, NY 10001
-                    </p>
+            <div class="footer-top">
+                <div class="footer-info">
+                    <h3>Get in Touch</h3>
+                    <p>Have questions or ready to get started? Reach out to us.</p>
                 </div>
-                <div class="contact-card">
-                    <div class="contact-icon">📞</div>
-                    <h3>Call Us</h3>
-                    <p>
-                        Main: <a href="tel:+11234567890">+1 (123) 456-7890</a><br>
-                        Support: <a href="tel:+10987654321">+1 (098) 765-4321</a>
-                    </p>
-                </div>
-                <div class="contact-card">
-                    <div class="contact-icon">✉️</div>
-                    <h3>Email Us</h3>
-                    <p>
-                        <a href="mailto:hello@example.com">hello@example.com</a><br>
-                        <a href="mailto:support@example.com">support@example.com</a>
-                    </p>
+                <div class="footer-contact-links">
+                    <div class="contact-item">
+                        <span>📍</span> 123 Business St, New York, NY 10001
+                    </div>
+                    <div class="contact-item">
+                        <span>📞</span> <a href="tel:+11234567890">+1 (123) 456-7890</a>
+                    </div>
+                    <div class="contact-item">
+                        <span>✉️</span> <a href="mailto:hello@example.com">hello@example.com</a>
+                    </div>
                 </div>
             </div>
-
-            <a href="mailto:hello@example.com" class="btn">Send an Email</a>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; <?php echo date("Y"); ?> MyWebsite. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> MyWebsite. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
