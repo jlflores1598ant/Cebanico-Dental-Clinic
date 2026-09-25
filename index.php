@@ -9,7 +9,7 @@
     <title>My Website</title>
     
     <!-- Link to external CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
