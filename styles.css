@@ -24,7 +24,6 @@ body {
 /* =========================
    Navigation
 ========================= */
-
 header {
     background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
@@ -72,7 +71,6 @@ nav {
 /* =========================
    Hero Slider
 ========================= */
-
 .hero-slider {
     position: relative;
     background: #eff6ff;
@@ -189,7 +187,6 @@ nav {
 /* =========================
    Buttons
 ========================= */
-
 .buttons {
     display: flex;
     gap: 15px;
@@ -226,7 +223,6 @@ nav {
 /* =========================
    Features
 ========================= */
-
 .features {
     padding: 90px 0;
 }
@@ -292,7 +288,6 @@ nav {
 /* =========================
    About
 ========================= */
-
 .about {
     padding: 90px 0;
     background: #f9fafb;
@@ -301,7 +296,6 @@ nav {
 /* =========================
    CTA / Contact Section
 ========================= */
-
 .cta {
     padding: 80px 0;
     background: #2563eb;
@@ -370,7 +364,6 @@ nav {
 /* =========================
    Footer
 ========================= */
-
 footer {
     background: #111827;
     color: #9ca3af;
@@ -381,13 +374,11 @@ footer {
 /* =========================
    Responsive Design
 ========================= */
-
 @media (max-width: 768px) {
     .nav-links {
         display: none;
     }
 
-    /* Slider adjustments */
     .slider-container { height: 500px; }
     .slide-content h1 { font-size: 40px; }
     .slide-content p { font-size: 17px; }

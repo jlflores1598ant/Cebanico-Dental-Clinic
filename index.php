@@ -6,12 +6,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>My Website</title>
-
+    
+    <!-- Link to external CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
     <!-- Navigation -->
@@ -21,7 +20,6 @@
                 <a href="#" class="logo">
                     <img src="imgs/1.jpg" alt="MyWebsite Logo">
                 </a>
-
                 <ul class="nav-links">
                     <li><a href="#home">Home</a></li>
                     <li><a href="#features">Features</a></li>
@@ -38,7 +36,6 @@
 
             <!-- Slide 1 -->
             <div class="slide active">
-                <!-- Image acts as a clickable link -->
                 <a href="#about">
                     <img src="https://via.placeholder.com/1200x600/eff6ff/111827?text=Click+to+view+About" alt="Slide 1">
                 </a>
@@ -67,8 +64,8 @@
             </div>
 
             <!-- Navigation Controls -->
-            <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
-            <a class="next" onclick="changeSlide(1)">&#10095;</a>
+            <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)">&#10094;</a>
+            <a class="next" role="button" tabindex="0" onclick="changeSlide(1)">&#10095;</a>
 
         </div>
     </section>
@@ -76,50 +73,26 @@
     <!-- Features -->
     <section class="features" id="features">
         <div class="container">
-
             <div class="section-title">
                 <h2>Why Choose Us?</h2>
-
-                <p>
-                    Everything you need to create a great online presence.
-                </p>
+                <p>Everything you need to create a great online presence.</p>
             </div>
-
             <div class="feature-grid">
-
                 <div class="feature-card">
                     <div class="icon"></div>
-
                     <h3>Fast</h3>
-
-                    <p>
-                        Lightweight and optimized code that loads
-                        quickly on desktop and mobile devices.
-                    </p>
+                    <p>Lightweight and optimized code that loads quickly on desktop and mobile devices.</p>
                 </div>
-
                 <div class="feature-card">
                     <div class="icon"></div>
-
                     <h3>Modern Design</h3>
-
-                    <p>
-                        A clean and professional design that can
-                        easily be customized.
-                    </p>
+                    <p>A clean and professional design that can easily be customized.</p>
                 </div>
-
                 <div class="feature-card">
                     <div class="icon"></div>
-
                     <h3>Responsive</h3>
-
-                    <p>
-                        Looks great on phones, tablets, laptops,
-                        and desktop screens.
-                    </p>
+                    <p>Looks great on phones, tablets, laptops, and desktop screens.</p>
                 </div>
-
             </div>
         </div>
     </section>
@@ -127,34 +100,20 @@
     <!-- About -->
     <section class="about" id="about">
         <div class="container">
-
             <div class="section-title">
                 <h2>About Us</h2>
-
-                <p>
-                    We create simple and effective digital experiences
-                    that help people and businesses establish their
-                    presence online.
-                </p>
+                <p>We create simple and effective digital experiences that help people and businesses establish their presence online.</p>
             </div>
-
         </div>
     </section>
 
     <!-- Contact / CTA -->
     <section class="cta" id="contact">
         <div class="container">
-
             <h2>Get in Touch</h2>
+            <p>Have questions or ready to get started? Reach out to us below.</p>
 
-            <p>
-                Have questions or ready to get started? Reach out to us below.
-            </p>
-
-            <!-- Contact Details Box -->
             <div class="contact-info">
-                
-                <!-- Address Card -->
                 <div class="contact-card">
                     <div class="contact-icon"></div>
                     <h3>Our Address</h3>
@@ -163,8 +122,6 @@
                         New York, NY 10001
                     </p>
                 </div>
-
-                <!-- Phone Numbers Card -->
                 <div class="contact-card">
                     <div class="contact-icon"></div>
                     <h3>Call Us</h3>
@@ -173,8 +130,6 @@
                         Support: <a href="tel:+10987654321">+1 (098) 765-4321</a>
                     </p>
                 </div>
-
-                <!-- Email Card -->
                 <div class="contact-card">
                     <div class="contact-icon"></div>
                     <h3>Email Us</h3>
@@ -183,60 +138,21 @@
                         <a href="mailto:support@example.com">support@example.com</a>
                     </p>
                 </div>
-
             </div>
 
-            <a href="mailto:hello@example.com" class="btn">
-                Send an Email
-            </a>
-
+            <a href="mailto:hello@example.com" class="btn">Send an Email</a>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
         <div class="container">
-
-            <p>
-                &copy; <?php echo date("Y"); ?> MyWebsite.
-                All rights reserved.
-            </p>
-
+            <p>&copy; <?php echo date("Y"); ?> MyWebsite. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Slider JavaScript -->
-    <script>
-        let slideIndex = 1;
-        showSlides(slideIndex);
-
-        // Next/previous controls
-        function changeSlide(n) {
-            showSlides(slideIndex += n);
-        }
-
-        function showSlides(n) {
-            let i;
-            let slides = document.getElementsByClassName("slide");
-            
-            // Loop back to first/last slide
-            if (n > slides.length) {slideIndex = 1}
-            if (n < 1) {slideIndex = slides.length}
-            
-            // Hide all slides
-            for (i = 0; i < slides.length; i++) {
-                slides[i].classList.remove("active");
-            }
-            
-            // Show current slide
-            slides[slideIndex - 1].classList.add("active");
-        }
-
-        // Auto-play slider every 5 seconds
-        setInterval(function() {
-            changeSlide(1);
-        }, 5000); 
-    </script>
+    <!-- Link to external JavaScript -->
+    <script src="script.js"></script>
 
 </body>
 </html>
