@@ -94,7 +94,7 @@ $services = [
             <!-- Persistent Overlay Content -->
             <div class="slide-content-overlay">
                 <h1>Mabuhay, <a href="#about" class="hero-highlight">Welcome!</a></h1>
-                <p>We build modern, fast, and responsive digital solutions designed to elevate your online presence.</p>
+                <p>We’re here to keep your smiles bright!</p>
                 <div class="buttons">
                     <a href="#services" class="btn btn-primary">Get Started</a>
                     <a href="#about" class="btn btn-secondary">Learn More</a>
