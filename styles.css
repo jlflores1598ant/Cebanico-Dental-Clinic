@@ -7,8 +7,10 @@
     box-sizing: border-box;
 }
 
+/* Added scroll padding to fix sections hiding under the sticky header */
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 70px; 
 }
 
 body {
@@ -85,14 +87,12 @@ nav {
 .slider-container {
     position: relative;
     width: 100%;
-    height: 80vh;
+    height: calc(100vh - 70px);
     min-height: 500px;
-    max-height: 750px;
     display: flex;
     align-items: center;
 }
 
-/* Cross-fading background slides */
 .slide {
     position: absolute;
     top: 0;
@@ -127,7 +127,6 @@ nav {
     transform: scale(1);
 }
 
-/* Fixed overlay content */
 .slide-content-overlay {
     position: absolute;
     top: 50%;
@@ -168,7 +167,6 @@ nav {
     line-height: 1.5;
 }
 
-/* Controls */
 .prev, .next {
     cursor: pointer;
     position: absolute;
@@ -201,7 +199,6 @@ nav {
     box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
 }
 
-/* Dots Indicator */
 .slider-dots {
     position: absolute;
     bottom: 25px;
@@ -314,7 +311,6 @@ nav {
     height: 320px;
     cursor: pointer;
     border-radius: 12px;
-    /* Uses hardware acceleration for smooth 60fps movement */
     will-change: transform, opacity, z-index;
 }
 
@@ -329,7 +325,6 @@ nav {
     background: #ffffff;
 }
 
-/* Subtle bump effect when hovering the active (center) item */
 .carousel-item.active .carousel-inner:hover {
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 25px 45px rgba(0,0,0,0.4);
@@ -455,55 +450,55 @@ nav {
 }
 
 /* =========================
-   About
-========================= */
-.about {
-    padding: 90px 0;
-    background: #ffffff;
-}
-
-/* =========================
-   Compact Contact / Footer
+   Compact 3-Column Footer
 ========================= */
 footer {
     background: #111827;
     color: #d1d5db;
-    padding: 50px 0 20px;
+    padding: 40px 0 15px; 
 }
 
 .footer-top {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-between; 
+    align-items: flex-start;
     flex-wrap: wrap;
-    gap: 30px;
-    margin-bottom: 40px;
+    gap: 40px; 
+    margin-bottom: 25px; 
     border-bottom: 1px solid #374151;
-    padding-bottom: 30px;
+    padding-bottom: 30px; 
 }
 
-.footer-info h3 {
+.footer-col {
+    flex: 1;
+    min-width: 250px; 
+}
+
+.footer-col h3 {
     color: #ffffff;
-    font-size: 24px;
-    margin-bottom: 10px;
+    font-size: 20px; 
+    margin-bottom: 15px;
+    font-weight: 600;
 }
 
-.footer-info p {
+.footer-col p {
     color: #9ca3af;
-    max-width: 400px;
+    max-width: 280px;
+    margin: 0;
 }
 
 .footer-contact-links {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .contact-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     font-size: 15px;
+    position: relative; 
 }
 
 .contact-item span {
@@ -521,64 +516,26 @@ footer {
     text-decoration: underline;
 }
 
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #d1d5db;
+    text-decoration: none;
+}
+
+.social-link:hover {
+    color: #93c5fd;
+}
+
 .footer-bottom {
     text-align: center;
     color: #9ca3af;
     font-size: 14px;
-    border-top: 1px solid #374151;
-    padding-top: 20px;
+    border-top: 1px solid transparent; 
+    padding-top: 10px;
 }
 
-/* =========================
-   Responsive Design
-========================= */
-@media (max-width: 768px) {
-    .nav-links { 
-        display: none; 
-    }
-    
-    .slider-container { 
-        height: 550px; 
-    }
-    
-    .slide-content-overlay h1 { 
-        font-size: 38px; 
-    }
-    
-    .slide-content-overlay p { 
-        font-size: 16px; 
-    }
-
-    .buttons {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn {
-        text-align: center;
-    }
-
-    .carousel-container { 
-        height: 350px; perspective: 800px; 
-    }
-    .carousel-item { 
-        width: 280px; height: 220px; 
-    }
-
-    .section-title h2 {
-        font-size: 28px;
-    }
-
-    .prev { left: 10px; }
-    .next { right: 10px; }
-    
-    .footer-top { 
-        flex-direction: column; text-align: center; 
-    }
-    .footer-contact-links { 
-        align-items: center; 
-    }
-}
 /* =========================
    Clinic Schedule List
 ========================= */
@@ -588,15 +545,16 @@ footer {
     color: #f3f4f6;
     font-size: 18px;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    max-width: 500px; /* Spreads the list out wider */
+    max-width: 500px; 
+    width: 100%;
 }
 
 .schedule-list li {
     display: flex;
-    justify-content: space-between; /* Pushes Day to the left, Time to the right */
+    justify-content: space-between; 
     align-items: center;
     margin-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Adds a subtle dividing line */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); 
     padding-bottom: 6px;
 }
 
@@ -605,22 +563,14 @@ footer {
     color: #93c5fd; 
 }
 
-/* Adjust sizes for mobile devices */
-@media (max-width: 768px) {
-    .schedule-list {
-        font-size: 16px;
-        max-width: 100%;
-    }
-}
-
- /* =========================
+/* =========================
    Slide 2 Split Layout
 ========================= */
 .slide-split {
-    max-width: 95%; /* Expands the overlay to span the screen */
+    max-width: 95%; 
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Centers the title vertically with the content */
+    align-items: center; 
     gap: 40px;
 }
 
@@ -630,30 +580,8 @@ footer {
 
 .split-right {
     flex: 1;
-    max-width: 500px; /* Keeps the schedule from stretching too wide */
+    max-width: 500px; 
     width: 100%;
-}
-
-/* Ensure the schedule list takes up the right container perfectly */
-.schedule-list {
-    width: 100%;
-}
-
-/* Mobile Responsive: Stack them back together on small screens */
-@media (max-width: 768px) {
-    .slide-split {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .slide-split h1 {
-        margin-bottom: 0;
-    }
-    
-    .split-right {
-        max-width: 100%;
-    }
 }
 
 /* =========================
@@ -661,7 +589,7 @@ footer {
 ========================= */
 .aesthetic-left {
     padding-left: 20px;
-    border-left: 4px solid #60a5fa; /* Matches your blue highlight color */
+    border-left: 4px solid #60a5fa; 
     max-width: 480px;
 }
 
@@ -677,23 +605,14 @@ footer {
 }
 
 .aesthetic-left h1 {
-    margin-bottom: 15px; /* Tightens the gap between the title and paragraph */
+    margin-bottom: 15px; 
 }
 
 .aesthetic-left p {
     font-size: 18px;
     color: #e5e7eb;
-    margin-bottom: 0; /* Removes bottom margin since buttons are on the right */
+    margin-bottom: 0; 
     line-height: 1.6;
-}
-
-/* Mobile Adjustments for Aesthetic Left */
-@media (max-width: 768px) {
-    .aesthetic-left {
-        padding-left: 15px;
-        border-left-width: 3px;
-        margin-bottom: 25px; /* Adds space before the schedule list on mobile */
-    }
 }
 
 /* =========================
@@ -713,13 +632,10 @@ footer {
     font-size: 22px;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-    
-    /* Hidden by default until scrolled down */
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
     transition: all 0.3s ease;
-    
     display: flex;
     align-items: center;
     justify-content: center;
@@ -731,20 +647,44 @@ footer {
     box-shadow: 0 6px 20px rgba(29, 78, 216, 0.5);
 }
 
-/* Active state toggled by JS */
 #backToTopBtn.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
 }
 
-/* Mobile Adjustments */
+/* =========================
+   Responsive Design
+========================= */
 @media (max-width: 768px) {
-    #backToTopBtn {
-        bottom: 20px;
-        right: 20px;
-        width: 44px;
-        height: 44px;
-        font-size: 18px;
+    .nav-links { display: none; }
+    .slider-container { height: 550px; }
+    .slide-content-overlay h1 { font-size: 38px; }
+    .slide-content-overlay p { font-size: 16px; }
+    .buttons { flex-direction: column; align-items: stretch; }
+    .btn { text-align: center; }
+    .carousel-container { height: 350px; perspective: 800px; }
+    .carousel-item { width: 280px; height: 220px; }
+    .section-title h2 { font-size: 28px; }
+    .prev { left: 10px; }
+    .next { right: 10px; }
+    
+    /* Footer Stacking */
+    .footer-top { 
+        flex-direction: column; 
+        text-align: center; 
+        gap: 30px; 
     }
+    .footer-col p { max-width: 100%; margin: auto; }
+    .footer-contact-links { align-items: center; }
+    .contact-item { justify-content: center; }
+
+    .schedule-list { font-size: 16px; max-width: 100%; }
+    .slide-split { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .slide-split h1 { margin-bottom: 0; }
+    .split-right { max-width: 100%; }
+    
+    .aesthetic-left { padding-left: 15px; border-left-width: 3px; margin-bottom: 25px; }
+    
+    #backToTopBtn { bottom: 20px; right: 20px; width: 44px; height: 44px; font-size: 18px; }
 }
