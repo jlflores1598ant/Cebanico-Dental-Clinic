@@ -9,6 +9,8 @@
 
 html {
     scroll-behavior: smooth;
+    /* Exactly matches the 70px header height to eliminate the gap */
+    scroll-padding-top: 70px; 
 }
 
 body {
@@ -41,12 +43,14 @@ nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative; /* Important for absolute mobile menu */
 }
 
 .logo {
     display: flex;
     align-items: center;
     text-decoration: none;
+    z-index: 1001; /* Keep above dropdown */
 }
 
 .logo img {
@@ -54,6 +58,28 @@ nav {
     width: auto;
     object-fit: contain;
 }
+
+/* Hamburger Icon */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 5px;
+    z-index: 1001;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: #374151;
+    border-radius: 3px;
+    transition: 0.3s ease;
+}
+
+/* When active (open) */
+.hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
 .nav-links {
     display: flex;
@@ -66,10 +92,29 @@ nav {
     color: #374151;
     font-weight: 500;
     transition: color 0.3s ease;
+    position: relative;
+    padding-bottom: 5px; 
 }
 
-.nav-links a:hover {
+.nav-links a:hover, 
+.nav-links a.active {
     color: #2563eb;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: #2563eb;
+    transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+    width: 100%;
 }
 
 /* =========================
@@ -85,14 +130,13 @@ nav {
 .slider-container {
     position: relative;
     width: 100%;
-    height: 80vh;
+    /* 100svh calculates the exact visible screen height on mobile */
+    height: calc(100svh - 70px);
     min-height: 500px;
-    max-height: 750px;
     display: flex;
     align-items: center;
 }
 
-/* Cross-fading background slides */
 .slide {
     position: absolute;
     top: 0;
@@ -127,7 +171,6 @@ nav {
     transform: scale(1);
 }
 
-/* Fixed overlay content */
 .slide-content-overlay {
     position: absolute;
     top: 50%;
@@ -155,10 +198,6 @@ nav {
     transition: color 0.3s ease;
 }
 
-.slide-content-overlay h1 .hero-highlight:hover {
-    color: #93c5fd;
-}
-
 .slide-content-overlay p {
     font-size: 20px;
     color: #f3f4f6;
@@ -168,19 +207,19 @@ nav {
     line-height: 1.5;
 }
 
-/* Controls */
+/* Made smaller as requested */
 .prev, .next {
     cursor: pointer;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
-    font-size: 20px;
+    font-size: 16px;
     transition: all 0.3s ease;
     user-select: none;
     z-index: 20;
@@ -201,7 +240,6 @@ nav {
     box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
 }
 
-/* Dots Indicator */
 .slider-dots {
     position: absolute;
     bottom: 25px;
@@ -272,17 +310,17 @@ nav {
 }
 
 /* =========================
-   Services (Infinite 3D Carousel)
+   Services (Compact & Centered)
 ========================= */
 .services {
-    padding: 90px 0;
+    padding: 30px 0 50px; 
     background: #f9fafb;
     overflow: hidden;
 }
 
 .section-title {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 10px; 
 }
 
 .section-title h2 {
@@ -300,12 +338,12 @@ nav {
 .carousel-container {
     position: relative;
     width: 100%;
-    height: 450px;
+    height: 380px; 
     display: flex;
     justify-content: center;
     align-items: center;
     perspective: 1200px; 
-    margin: 20px 0;
+    margin: 5px 0; 
 }
 
 .carousel-item {
@@ -314,7 +352,6 @@ nav {
     height: 320px;
     cursor: pointer;
     border-radius: 12px;
-    /* Uses hardware acceleration for smooth 60fps movement */
     will-change: transform, opacity, z-index;
 }
 
@@ -329,7 +366,6 @@ nav {
     background: #ffffff;
 }
 
-/* Subtle bump effect when hovering the active (center) item */
 .carousel-item.active .carousel-inner:hover {
     transform: translateY(-8px) scale(1.02);
     box-shadow: 0 25px 45px rgba(0,0,0,0.4);
@@ -364,7 +400,7 @@ nav {
     display: flex;
     justify-content: center;
     gap: 20px;
-    margin-top: 40px;
+    margin-top: 15px; 
 }
 
 .carousel-controls button {
@@ -455,55 +491,69 @@ nav {
 }
 
 /* =========================
-   About
-========================= */
-.about {
-    padding: 90px 0;
-    background: #ffffff;
-}
-
-/* =========================
-   Compact Contact / Footer
+   Compact Footer
 ========================= */
 footer {
     background: #111827;
     color: #d1d5db;
-    padding: 50px 0 20px;
+    padding: 40px 0 15px; 
 }
 
 .footer-top {
     display: flex;
+    justify-content: space-between; 
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 40px; 
+    margin-bottom: 25px; 
+    border-bottom: 1px solid #374151;
+    padding-bottom: 30px; 
+}
+
+.footer-col {
+    flex: 1;
+    min-width: 250px; 
+}
+
+.footer-col h3 {
+    color: #ffffff;
+    font-size: 20px; 
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin-bottom: 40px;
-    border-bottom: 1px solid #374151;
-    padding-bottom: 30px;
 }
 
-.footer-info h3 {
-    color: #ffffff;
+.toggle-icon {
+    display: none; /* Only visible on mobile */
     font-size: 24px;
-    margin-bottom: 10px;
+    font-weight: 400;
+    color: #60a5fa;
 }
 
-.footer-info p {
+.footer-content {
+    display: block; /* Standard desktop display */
+}
+
+.footer-col p {
     color: #9ca3af;
-    max-width: 400px;
+    max-width: 280px;
+    margin: 0;
 }
 
 .footer-contact-links {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .contact-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     font-size: 15px;
+    position: relative; 
 }
 
 .contact-item span {
@@ -521,64 +571,26 @@ footer {
     text-decoration: underline;
 }
 
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #d1d5db;
+    text-decoration: none;
+}
+
+.social-link:hover {
+    color: #93c5fd;
+}
+
 .footer-bottom {
     text-align: center;
     color: #9ca3af;
     font-size: 14px;
-    border-top: 1px solid #374151;
-    padding-top: 20px;
+    border-top: 1px solid transparent; 
+    padding-top: 10px;
 }
 
-/* =========================
-   Responsive Design
-========================= */
-@media (max-width: 768px) {
-    .nav-links { 
-        display: none; 
-    }
-    
-    .slider-container { 
-        height: 550px; 
-    }
-    
-    .slide-content-overlay h1 { 
-        font-size: 38px; 
-    }
-    
-    .slide-content-overlay p { 
-        font-size: 16px; 
-    }
-
-    .buttons {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn {
-        text-align: center;
-    }
-
-    .carousel-container { 
-        height: 350px; perspective: 800px; 
-    }
-    .carousel-item { 
-        width: 280px; height: 220px; 
-    }
-
-    .section-title h2 {
-        font-size: 28px;
-    }
-
-    .prev { left: 10px; }
-    .next { right: 10px; }
-    
-    .footer-top { 
-        flex-direction: column; text-align: center; 
-    }
-    .footer-contact-links { 
-        align-items: center; 
-    }
-}
 /* =========================
    Clinic Schedule List
 ========================= */
@@ -588,15 +600,16 @@ footer {
     color: #f3f4f6;
     font-size: 18px;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    max-width: 500px; /* Spreads the list out wider */
+    max-width: 500px; 
+    width: 100%;
 }
 
 .schedule-list li {
     display: flex;
-    justify-content: space-between; /* Pushes Day to the left, Time to the right */
+    justify-content: space-between; 
     align-items: center;
     margin-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Adds a subtle dividing line */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); 
     padding-bottom: 6px;
 }
 
@@ -605,22 +618,14 @@ footer {
     color: #93c5fd; 
 }
 
-/* Adjust sizes for mobile devices */
-@media (max-width: 768px) {
-    .schedule-list {
-        font-size: 16px;
-        max-width: 100%;
-    }
-}
-
- /* =========================
+/* =========================
    Slide 2 Split Layout
 ========================= */
 .slide-split {
-    max-width: 95%; /* Expands the overlay to span the screen */
+    max-width: 95%; 
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Centers the title vertically with the content */
+    align-items: center; 
     gap: 40px;
 }
 
@@ -630,30 +635,8 @@ footer {
 
 .split-right {
     flex: 1;
-    max-width: 500px; /* Keeps the schedule from stretching too wide */
+    max-width: 500px; 
     width: 100%;
-}
-
-/* Ensure the schedule list takes up the right container perfectly */
-.schedule-list {
-    width: 100%;
-}
-
-/* Mobile Responsive: Stack them back together on small screens */
-@media (max-width: 768px) {
-    .slide-split {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .slide-split h1 {
-        margin-bottom: 0;
-    }
-    
-    .split-right {
-        max-width: 100%;
-    }
 }
 
 /* =========================
@@ -661,7 +644,7 @@ footer {
 ========================= */
 .aesthetic-left {
     padding-left: 20px;
-    border-left: 4px solid #60a5fa; /* Matches your blue highlight color */
+    border-left: 4px solid #60a5fa; 
     max-width: 480px;
 }
 
@@ -677,23 +660,14 @@ footer {
 }
 
 .aesthetic-left h1 {
-    margin-bottom: 15px; /* Tightens the gap between the title and paragraph */
+    margin-bottom: 15px; 
 }
 
 .aesthetic-left p {
     font-size: 18px;
     color: #e5e7eb;
-    margin-bottom: 0; /* Removes bottom margin since buttons are on the right */
+    margin-bottom: 0; 
     line-height: 1.6;
-}
-
-/* Mobile Adjustments for Aesthetic Left */
-@media (max-width: 768px) {
-    .aesthetic-left {
-        padding-left: 15px;
-        border-left-width: 3px;
-        margin-bottom: 25px; /* Adds space before the schedule list on mobile */
-    }
 }
 
 /* =========================
@@ -713,13 +687,10 @@ footer {
     font-size: 22px;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-    
-    /* Hidden by default until scrolled down */
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
     transition: all 0.3s ease;
-    
     display: flex;
     align-items: center;
     justify-content: center;
@@ -731,20 +702,154 @@ footer {
     box-shadow: 0 6px 20px rgba(29, 78, 216, 0.5);
 }
 
-/* Active state toggled by JS */
 #backToTopBtn.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
 }
 
-/* Mobile Adjustments */
+/* =========================
+   Mobile Responsive Design
+========================= */
 @media (max-width: 768px) {
-    #backToTopBtn {
-        bottom: 20px;
-        right: 20px;
-        width: 44px;
-        height: 44px;
+    /* Navbar Dropdown */
+    .hamburger { display: flex; }
+    
+    .nav-links {
+        position: absolute;
+        top: 70px; /* Right below header */
+        left: 0;
+        width: 100%;
+        background-color: #ffffff;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        transform: translateY(-150%);
+        transition: transform 0.4s ease-in-out;
+        z-index: 999;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .nav-links.active {
+        transform: translateY(0);
+    }
+
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-links a {
+        display: block;
+        padding: 20px;
         font-size: 18px;
     }
+    
+    .nav-links a::after { display: none; } /* Remove underline in mobile */
+
+    /* Hero Fitting */
+    .slider-container { 
+        height: calc(100svh - 70px); /* Strictly lock to exact visible window */
+    }
+    
+    /* Make text scale down better on small screens so it doesn't overflow */
+    .slide-content-overlay {
+        top: 45%; 
+        width: 90%;
+        left: 5%;
+    }
+    
+    .slide-content-overlay h1 { font-size: 32px; margin-bottom: 10px;}
+    .slide-content-overlay p { font-size: 15px; margin-bottom: 20px;}
+    .desktop-only-p { display: none; } /* Hide unnecessary text on Slide 2 for space */
+    
+    /* Adjust buttons inside Hero */
+    .buttons { flex-direction: column; align-items: stretch; gap: 10px; }
+    .btn { padding: 12px; text-align: center; font-size: 14px; }
+    
+    /* Make arrows even smaller on mobile */
+    .prev, .next { width: 30px; height: 30px; font-size: 12px; }
+    .prev { left: 10px; }
+    .next { right: 10px; }
+
+    /* Shrink the clinic hours list so it fits entirely inside the screen */
+    .schedule-list { font-size: 13px; margin-bottom: 20px; }
+    .schedule-list li { margin-bottom: 6px; padding-bottom: 4px; }
+    
+    .slide-split { flex-direction: column; align-items: flex-start; gap: 5px; }
+    .aesthetic-left { padding-left: 10px; border-left-width: 3px; margin-bottom: 15px; }
+
+    /* Carousel */
+    .carousel-container { height: 350px; perspective: 800px; }
+    .carousel-item { width: 280px; height: 220px; }
+    .section-title h2 { font-size: 28px; }
+    
+    /* Mobile Footer Accordion (Tighter Aesthetics) */
+    footer {
+        padding: 25px 0 15px; /* Less top padding */
+    }
+
+    .footer-top { 
+        flex-direction: column; 
+        gap: 5px; /* Reduced gap between boxes */
+        padding-bottom: 10px;
+    }
+    
+    .footer-col { 
+        width: 100%; 
+        border-bottom: 1px solid #374151; 
+        padding-bottom: 10px; 
+        margin-bottom: 0;
+    }
+    
+    .footer-col h3 { 
+        margin-bottom: 0; 
+        cursor: pointer; 
+        padding: 12px 0; /* Easier to tap, takes less overall space */
+        font-size: 17px; /* Smaller font */
+    }
+    
+    .toggle-icon { 
+        display: block; 
+        font-size: 20px; 
+    }
+    
+    .footer-content {
+        display: none; 
+        padding-top: 5px;
+        padding-bottom: 12px;
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    .footer-col.active .footer-content { 
+        display: block; 
+    }
+
+    .footer-col p { 
+        max-width: 100%; 
+        font-size: 14px; /* Smaller paragraph text */
+    }
+
+    .contact-item {
+        font-size: 14px; /* Smaller list links */
+        gap: 10px; 
+    }
+
+    .contact-item span {
+        font-size: 16px; /* Smaller emoji icons */
+    }
+
+    .social-link svg {
+        width: 16px; /* Smaller social icons */
+        height: 16px;
+    }
+    
+    /* Shrink the floating button slightly */
+    #backToTopBtn { bottom: 20px; right: 20px; width: 42px; height: 42px; font-size: 16px; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
