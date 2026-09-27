@@ -3,8 +3,8 @@
 ========================= */
 let slideIndex = 1;
 let slideInterval;
+let isHeroHovered = false; 
 
-// Initialize hero slider
 showSlides(slideIndex);
 startSliderTimer();
 
@@ -22,12 +22,12 @@ function showSlides(n) {
     let i;
     let slides = document.getElementsByClassName("slide");
     let dots = document.getElementsByClassName("dot");
+    let prevBtn = document.querySelector(".prev");
+    let nextBtn = document.querySelector(".next");
     
-    // Loop back to first or last slide
     if (n > slides.length) { slideIndex = 1; }
     if (n < 1) { slideIndex = slides.length; }
     
-    // Reset active classes
     for (i = 0; i < slides.length; i++) {
         slides[i].classList.remove("active");
     }
@@ -35,24 +35,58 @@ function showSlides(n) {
         dots[i].classList.remove("active");
     }
     
-    // Set active slide and dot
     if (slides.length > 0) {
         slides[slideIndex - 1].classList.add("active");
     }
     if (dots.length > 0) {
         dots[slideIndex - 1].classList.add("active");
     }
+
+    // Dynamic visibility for navigation arrows
+    if (prevBtn && nextBtn) {
+        if (slideIndex === 1) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "flex"; 
+        }
+
+        if (slideIndex === slides.length) {
+            nextBtn.style.display = "none";
+        } else {
+            nextBtn.style.display = "flex";
+        }
+    }
 }
 
 function startSliderTimer() {
+    clearInterval(slideInterval);
     slideInterval = setInterval(function() {
-        showSlides(slideIndex += 1);
+        // Only progress the slide if the user's mouse is NOT over the section
+        if (!isHeroHovered) {
+            showSlides(slideIndex += 1);
+        }
     }, 5000); 
 }
 
 function resetSliderTimer() {
     clearInterval(slideInterval);
     startSliderTimer();
+}
+
+// ==========================================
+// Strict Pause Slider on Hover
+// ==========================================
+const heroSection = document.querySelector('.hero-slider');
+
+if (heroSection) {
+    heroSection.addEventListener('mouseenter', () => {
+        isHeroHovered = true;
+    });
+    
+    heroSection.addEventListener('mouseleave', () => {
+        isHeroHovered = false;
+        resetSliderTimer(); 
+    });
 }
 
 /* ========================================================
@@ -219,4 +253,24 @@ window.onclick = function(event) {
         modal.style.display = "none";
         isModalOpen = false;
     }
+}
+
+/* =========================
+   Back to Top Functionality
+========================= */
+const backToTopBtn = document.getElementById("backToTopBtn");
+
+window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+        backToTopBtn.classList.add("show");
+    } else {
+        backToTopBtn.classList.remove("show");
+    }
+});
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 }
