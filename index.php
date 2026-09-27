@@ -103,11 +103,11 @@ $services = [
 
             <!-- Slide 1 Background -->
             <div class="slide active">
-                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1" >
+                <img src="Images/FrontDeskWlogo.png" alt="Slide 1" >
 
             <!-- Slide 2 Background -->
             <div class="slide">
-                <img src="Images/OutsideClinic.JPEG" alt="Slide 2" >
+                <img src="Images/OutsideClinic.png" alt="Slide 2" >
             </div>
 
             <!-- Navigation Controls -->
