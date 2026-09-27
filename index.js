@@ -1,4 +1,101 @@
 /* =========================
+   Hamburger Menu & Mobile Nav
+========================= */
+const hamburger = document.getElementById('hamburger');
+const navLinksContainer = document.getElementById('navLinks');
+const navLinksItems = document.querySelectorAll('.nav-links a');
+
+// Toggle menu open/close
+hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navLinksContainer.classList.toggle('active');
+});
+
+// Close menu when a link is clicked
+navLinksItems.forEach(link => {
+    link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navLinksContainer.classList.remove('active');
+    });
+});
+
+/* =========================
+   Mobile Footer Accordion
+========================= */
+const footerHeaders = document.querySelectorAll('.footer-col h3');
+
+footerHeaders.forEach(header => {
+    header.addEventListener('click', () => {
+        // Only trigger accordion behavior on mobile widths
+        if (window.innerWidth <= 768) {
+            const parentCol = header.parentElement;
+            const icon = header.querySelector('.toggle-icon');
+            
+            // Toggle active class to show/hide content
+            parentCol.classList.toggle('active');
+            
+            // Change the + to a - when open
+            if (parentCol.classList.contains('active')) {
+                icon.textContent = '-';
+            } else {
+                icon.textContent = '+';
+            }
+        }
+    });
+});
+
+/* =========================
+   Scrollspy & Perfect Home Click
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+    const sections = document.querySelectorAll("section, footer"); 
+    const navLinks = document.querySelectorAll(".nav-links a");
+
+    // Force perfect scroll to Top (0px) when clicking Home
+    const homeLink = document.querySelector('.nav-links a[href="#home"]');
+    if (homeLink) {
+        homeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+    }
+
+    window.addEventListener("scroll", () => {
+        let current = "";
+
+        sections.forEach((section) => {
+            const sectionTop = section.offsetTop;
+            // Detect when scrolling past the section top 
+            if (window.scrollY >= sectionTop - 150) {
+                current = section.getAttribute("id");
+            }
+        });
+
+        // Ensure "Home" gets selected if we are near the very top of the page
+        if (window.scrollY < 100) {
+            current = "home";
+        }
+
+        // Fix for the bottom of the page: force "contact" if we've scrolled all the way down
+        if ((window.innerHeight + Math.round(window.scrollY)) >= document.body.offsetHeight - 50) {
+            current = "contact";
+        }
+
+        // Loop through all links, remove active class, and add it to the current target
+        navLinks.forEach((link) => {
+            link.classList.remove("active");
+            const href = link.getAttribute("href").replace("#", "");
+            if (href === current) {
+                link.classList.add("active");
+            }
+        });
+    });
+});
+
+/* =========================
    Hero Slider Functionality
 ========================= */
 let slideIndex = 1;
