@@ -87,55 +87,52 @@ $services = [
         </div>
     </header>
 
-    <!-- Hero Slider -->
+    <!-- Merged Hero Slider -->
     <section class="hero-slider" id="home">
         <div class="slider-container">
-            <!-- Slide 1 -->
+
+            <!-- Slide 1 Background and Content -->
             <div class="slide active">
-                <a href="#about">
-                    <img src="Images/FrontDesk.JPEG" alt="Slide 1" onerror="this.src='https://placehold.co/1200x600/eff6ff/111827?text=Welcome+to+Our+Clinic'">
-                </a>
-                <div class="slide-content">
-                    <h1>Build Something <a href="#about" class="hero-highlight">Awesome.</a></h1>
-                    <p>A clean and modern website built with PHP, HTML, and CSS. Click the image to learn more.</p>
+                <img src="Images/FrontDeskWlogo.png" alt="Slide 1" >
+                <div class="slide-content-overlay">
+                    <h1>Mabuhay, <span class="hero-highlight">Welcome!</span></h1>
+                    <p>We’re here to keep your smiles bright!</p>
                     <div class="buttons">
                         <a href="#services" class="btn btn-primary">Get Started</a>
                         <a href="#about" class="btn btn-secondary">Learn More</a>
                     </div>
-
-            <!-- Persistent Overlay Content -->
-            <div class="slide-content-overlay">
-                <h1>Mabuhay, <a href="#about" class="hero-highlight">Welcome!</a></h1>
-                <p>We build modern, fast, and responsive digital solutions designed to elevate your online presence.</p>
-                <div class="buttons">
-                    <a href="#features" class="btn btn-primary">Get Started</a>
-                    <a href="#about" class="btn btn-secondary">Learn More</a>
                 </div>
-            </div>
+            </div> 
 
-            <!-- Slide 1 Background -->
-            <div class="slide active">
-                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1">
-            </div>
-
-            <!-- Slide 2 Background -->
+            <!-- Slide 2 Background and Content (Clinic Hours) -->
             <div class="slide">
-                <a href="#services">
-                    <img src="https://placehold.co/1200x600/dbeafe/111827?text=Click+to+view+Services" alt="Slide 2">
-                </a>
-                <div class="slide-content">
-                    <h1>Fast & <a href="#services" class="hero-highlight">Modern.</a></h1>
-                    <p>Optimized code that loads quickly on desktop and mobile devices. Click the image for our services.</p>
-                    <div class="buttons">
-                        <a href="#services" class="btn btn-primary">View Services</a>
+                <img src="Images/OutsideClinic.png" alt="Slide 2" >
+                
+                <div class="slide-content-overlay slide-split">
+                    <!-- Upgraded Aesthetic Title on the left -->
+                    <div class="split-left aesthetic-left">
+                        <span class="eyebrow-text">Plan Your Visit</span>
+                        <h1>Clinic <span class="hero-highlight">Hours</span></h1>
+                        <p>We are dedicated to providing top-tier dental care. Check our schedule to drop by, or book a private appointment for specialized treatments.</p>
+                    </div>
+                    
+                    <!-- Content on the right -->
+                    <div class="split-right">
+                        <ul class="schedule-list">
+                            <li><span>Monday:</span> 10AM – 6PM</li>
+                            <li><span>Tuesday:</span> 10AM – 6PM</li>
+                            <li><span>Wednesday:</span> 10AM – 6PM</li>
+                            <li><span>Thursday:</span> Closed</li>
+                            <li><span>Friday:</span> Strictly by Appointment</li>
+                            <li><span>Saturday:</span> 10AM – 6PM</li>
+                            <li><span>Sunday:</span> 10AM – 6PM</li>
+                        </ul>
+                        <div class="buttons">
+                            <a href="#contact" class="btn btn-primary">Book Appointment</a>
+                            <a href="tel:+11234567890" class="btn btn-secondary">Call Us Now</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Navigation Controls -->
-            <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)">&#10094;</a>
-            <a class="next" role="button" tabindex="0" onclick="changeSlide(1)">&#10095;</a>
-                <img src="Images/OutsideClinic.JPEG" alt="Slide 2">
             </div>
 
             <!-- Navigation Controls -->
@@ -203,6 +200,9 @@ $services = [
             </div>
         </div>
     </section>
+
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" aria-label="Back to Top" onclick="scrollToTop()">&#8679;</button>
 
     <!-- Compact Contact / Footer -->
     <footer id="contact">

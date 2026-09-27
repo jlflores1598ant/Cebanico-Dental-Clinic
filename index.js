@@ -3,8 +3,8 @@
 ========================= */
 let slideIndex = 1;
 let slideInterval;
+let isHeroHovered = false; 
 
-// Initialize hero slider
 showSlides(slideIndex);
 startSliderTimer();
 
@@ -22,15 +22,12 @@ function showSlides(n) {
     let i;
     let slides = document.getElementsByClassName("slide");
     let dots = document.getElementsByClassName("dot");
+    let prevBtn = document.querySelector(".prev");
+    let nextBtn = document.querySelector(".next");
     
     if (n > slides.length) { slideIndex = 1; }
     if (n < 1) { slideIndex = slides.length; }
     
-    // Loop back to first or last slide
-    if (n > slides.length) { slideIndex = 1; }
-    if (n < 1) { slideIndex = slides.length; }
-    
-    // Reset active classes
     for (i = 0; i < slides.length; i++) {
         slides[i].classList.remove("active");
     }
@@ -38,24 +35,58 @@ function showSlides(n) {
         dots[i].classList.remove("active");
     }
     
-    // Set active slide and dot
     if (slides.length > 0) {
         slides[slideIndex - 1].classList.add("active");
     }
     if (dots.length > 0) {
         dots[slideIndex - 1].classList.add("active");
     }
+
+    // Dynamic visibility for navigation arrows
+    if (prevBtn && nextBtn) {
+        if (slideIndex === 1) {
+            prevBtn.style.display = "none";
+        } else {
+            prevBtn.style.display = "flex"; 
+        }
+
+        if (slideIndex === slides.length) {
+            nextBtn.style.display = "none";
+        } else {
+            nextBtn.style.display = "flex";
+        }
+    }
 }
 
 function startSliderTimer() {
+    clearInterval(slideInterval);
     slideInterval = setInterval(function() {
-        showSlides(slideIndex += 1);
+        // Only progress the slide if the user's mouse is NOT over the section
+        if (!isHeroHovered) {
+            showSlides(slideIndex += 1);
+        }
     }, 5000); 
 }
 
 function resetSliderTimer() {
     clearInterval(slideInterval);
     startSliderTimer();
+}
+
+// ==========================================
+// Strict Pause Slider on Hover
+// ==========================================
+const heroSection = document.querySelector('.hero-slider');
+
+if (heroSection) {
+    heroSection.addEventListener('mouseenter', () => {
+        isHeroHovered = true;
+    });
+    
+    heroSection.addEventListener('mouseleave', () => {
+        isHeroHovered = false;
+        resetSliderTimer(); 
+    });
 }
 
 /* ========================================================
@@ -65,14 +96,13 @@ const carouselItems = document.querySelectorAll('.carousel-item');
 const totalItems = carouselItems.length;
 
 // absoluteFloatIndex counts to infinity (e.g. 0, 10, 100, 1000...) and never wraps.
-// This prevents ANY snapping or rewinding when traversing the edges.
 let absoluteFloatIndex = 0;   
 let targetAbsoluteIndex = null; 
 let isHovered = false;        
 let isModalOpen = false;  
-let isPausedByClick = false; // Tracks if the user just clicked
-let clickPauseTimeout;       // The timer for the pause
-const autoSpeed = 0.004;     // Smooth continuous drift speed
+let isPausedByClick = false; 
+let clickPauseTimeout;       
+const autoSpeed = 0.004;     
 
 function renderCarousel() {
     if (totalItems === 0) return;
@@ -106,9 +136,9 @@ function renderCarousel() {
         let absDiff = Math.abs(diff);
 
         // 3D positioning mathematics
-        let translateX = diff * 200;            // Spread out horizontally
-        let translateZ = -absDiff * 250;        // Push back into the screen
-        let rotateY = -diff * 12;               // Angle them inwards
+        let translateX = diff * 200;            
+        let translateZ = -absDiff * 250;        
+        let rotateY = -diff * 12;               
         let scale = Math.max(0.6, 1 - absDiff * 0.1); 
         
         // Fade out items that are further back
@@ -117,7 +147,7 @@ function renderCarousel() {
         // Ensure center items overlap the outer items
         let zIndex = Math.round(100 - absDiff * 10);
 
-        // Apply styles without CSS transition for pure JS hardware acceleration
+        // Uses proper template literals with backticks to apply the CSS dynamically
         item.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`;
         item.style.opacity = opacity;
         item.style.zIndex = zIndex;
@@ -144,42 +174,50 @@ if (carouselContainer) {
 // Temporary Pause Function (Triggers on click)
 function pauseCarouselTemporarily() {
     isPausedByClick = true;
-    clearTimeout(clickPauseTimeout); // Clear previous timer if they click multiple times fast
+    clearTimeout(clickPauseTimeout); 
     
-    // Resume drifting after 5 seconds (5000 milliseconds)
+    // Resume drifting after 5 seconds
     clickPauseTimeout = setTimeout(() => {
         isPausedByClick = false;
     }, 5000);
 }
 
-// Arrow Button Navigation
+// Arrow Button Navigation (FIXED CENTERING LOGIC)
 function navigateCarousel(direction) {
-    // Math.round ensures we calculate from the nearest whole integer, snapping the next item perfectly to the center
-    let currentBase = (targetAbsoluteIndex !== null) ? targetAbsoluteIndex : Math.round(absoluteFloatIndex);
-    targetAbsoluteIndex = currentBase + direction;
+    // 1. Find exactly what integer we are closest to right now
+    let currentCenter = Math.round(absoluteFloatIndex);
+    if (targetAbsoluteIndex !== null) {
+        currentCenter = targetAbsoluteIndex;
+    }
     
-    pauseCarouselTemporarily(); // Trigger the 5-second pause
+    // 2. Add the direction. This guarantees target is a perfect integer (dead center).
+    targetAbsoluteIndex = currentCenter + direction;
+    pauseCarouselTemporarily();
 }
 
-// Handle clicking on specific items
+// Handle clicking on specific items (FIXED CENTERING LOGIC)
 function handleCarouselClick(clickedIndex, title, desc) {
-    let normalizedFloat = ((absoluteFloatIndex % totalItems) + totalItems) % totalItems;
-    let diff = clickedIndex - normalizedFloat;
+    // 1. Find exactly what integer we are closest to right now
+    let currentCenter = Math.round(absoluteFloatIndex);
+    if (targetAbsoluteIndex !== null) {
+        currentCenter = targetAbsoluteIndex;
+    }
+
+    // 2. What physical array item is currently at that center?
+    let currentNormalized = ((currentCenter % totalItems) + totalItems) % totalItems;
     
-    // Shortest path around the circle
+    // 3. Find the shortest path from the current center to the clicked item
+    let diff = clickedIndex - currentNormalized;
     if (diff > totalItems / 2) diff -= totalItems;
     if (diff < -totalItems / 2) diff += totalItems;
 
-    // If they clicked the center-most item, open modal
-    if (Math.abs(diff) < 0.4) {
+    // 4. If distance is 0, they clicked the center item, so open the modal
+    if (diff === 0) {
         openModal(title, desc);
     } else {
-        // Shift the carousel by the relative distance clicked. 
-        // Math.round forces it to snap to a perfectly centered integer.
-        let currentBase = (targetAbsoluteIndex !== null) ? targetAbsoluteIndex : absoluteFloatIndex;
-        targetAbsoluteIndex = Math.round(currentBase + diff);
-        
-        pauseCarouselTemporarily(); // Trigger the 5-second pause
+        // Shift exactly by the integer difference
+        targetAbsoluteIndex = currentCenter + diff;
+        pauseCarouselTemporarily();
     }
 }
 
@@ -215,4 +253,24 @@ window.onclick = function(event) {
         modal.style.display = "none";
         isModalOpen = false;
     }
+}
+
+/* =========================
+   Back to Top Functionality
+========================= */
+const backToTopBtn = document.getElementById("backToTopBtn");
+
+window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+        backToTopBtn.classList.add("show");
+    } else {
+        backToTopBtn.classList.remove("show");
+    }
+});
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 }
