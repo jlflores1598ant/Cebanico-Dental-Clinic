@@ -4,57 +4,52 @@ $services = [
     [
         "title" => "Consultation",
         "desc" => "Comprehensive dental checkup, x-ray reviews, and personalized treatment planning to ensure your optimal oral health.",
-        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Consultation"
+        "img" => "Images/Consultation.jpg"
     ],
     [
         "title" => "Oral Prophylaxis (Cleaning)",
         "desc" => "Professional teeth cleaning to remove plaque, tartar, and stains, preventing cavities and gum disease.",
-        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Cleaning"
+        "img" => "Images/Cleaning.jpg"
     ],
     [
         "title" => "Tooth Extraction (Bunot)",
         "desc" => "Safe and painless removal of damaged, severely decayed, or problematic teeth, including wisdom teeth extraction.",
-        "img" => "https://placehold.co/800x600/1e3a8a/ffffff?text=Extraction"
-    ],
-    [
-        "title" => "Surgery",
-        "desc" => "Advanced minor oral surgeries including impacted wisdom tooth removal, bone grafting, and gingivectomy.",
-        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Surgery"
+        "img" => "Images/Extraction.jpg"
     ],
     [
         "title" => "Tooth Restoration (Pasta)",
         "desc" => "High-quality tooth-colored composite fillings to repair cavities, chipped teeth, and restore your natural smile.",
-        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Restoration"
+        "img" => "Images/Restoration(PASTA).jpg"
     ],
     [
         "title" => "Dentures (Pustiso)",
         "desc" => "Custom-fitted removable partial or complete dentures to replace missing teeth and restore chewing function.",
-        "img" => "https://placehold.co/800x600/1e3a8a/ffffff?text=Dentures"
+        "img" => "Images/Denture.jpg"
     ],
     [
         "title" => "Teeth Whitening",
         "desc" => "Professional bleaching treatments to safely and effectively brighten discolored or stained teeth.",
-        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Whitening"
+        "img" => "Images/Whitening.jpg"
     ],
     [
-        "title" => "Braces Installation",
+        "title" => "Braces",
         "desc" => "Orthodontic treatment setup using metal or ceramic brackets to correct misaligned teeth and bite issues.",
-        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Braces+Install"
+        "img" => "Images/Braces.png"
     ],
     [
-        "title" => "Braces Adjustment",
-        "desc" => "Routine orthodontic tightening and wire replacements to ensure continuous progress in your teeth alignment.",
-        "img" => "https://placehold.co/800x600/1e3a8a/ffffff?text=Braces+Adjust"
+        "title" => "EMAX Crown",
+        "desc" => "High-quality ceramic crowns to restore the appearance and function of damaged or decayed teeth.",
+        "img" => "Images/EMAX Crown.jpg"
     ],
     [
         "title" => "Root Canal Treatment",
         "desc" => "Endodontic therapy to save severely infected or decaying teeth by cleaning out the infected pulp and sealing it.",
-        "img" => "https://placehold.co/800x600/2563eb/ffffff?text=Root+Canal"
+        "img" => "Images/RootCanal.jpg"
     ],
     [
         "title" => "Fixed Bridge - Tooth Preparation",
         "desc" => "Preparation and placement of permanent prosthetic bridges to seamlessly fill the gaps left by missing teeth.",
-        "img" => "https://placehold.co/800x600/1d4ed8/ffffff?text=Fixed+Bridge"
+        "img" => "Images/FixedBridge.jpg"
     ]
 ];
 ?>
