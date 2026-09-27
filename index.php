@@ -104,6 +104,7 @@ $services = [
             <!-- Slide 1 Background -->
             <div class="slide active">
                 <img src="Images/FrontDeskWlogo.png" alt="Slide 1" >
+            </div> <!-- Added missing closing div here -->
 
             <!-- Slide 2 Background -->
             <div class="slide">
