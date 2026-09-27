@@ -103,12 +103,11 @@ $services = [
 
             <!-- Slide 1 Background -->
             <div class="slide active">
-                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1" onerror="this.src='https://placehold.co/1200x800/0f172a/ffffff?text=Slide+1'">
-            </div>
+                <img src="Images/FrontDeskWlogo.JPEG" alt="Slide 1" >
 
             <!-- Slide 2 Background -->
             <div class="slide">
-                <img src="Images/OutsideClinic.JPEG" alt="Slide 2" onerror="this.src='https://placehold.co/1200x800/1e293b/ffffff?text=Slide+2'">
+                <img src="Images/OutsideClinic.JPEG" alt="Slide 2" >
             </div>
 
             <!-- Navigation Controls -->
