@@ -18,7 +18,7 @@ navLinksItems.forEach(link => {
 });
 
 /* =========================
-   Scroll Reveal Animations (NEW)
+   Scroll Reveal Animations
 ========================= */
 function reveal() {
     var reveals = document.querySelectorAll(".reveal");
@@ -73,7 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let current = "";
         sections.forEach((section) => {
             const sectionTop = section.offsetTop;
-            if (window.scrollY >= sectionTop - 150) {
+            // Adjusted offset since we removed scroll-padding-top in CSS
+            if (window.scrollY >= sectionTop - 50) {
                 current = section.getAttribute("id");
             }
         });

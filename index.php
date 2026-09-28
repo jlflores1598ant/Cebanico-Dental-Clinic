@@ -65,7 +65,7 @@ $services = [
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Cache Busting Link to CSS -->
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 
@@ -248,7 +248,7 @@ $services = [
         </div>
     </footer>
 
-    <script src="index.js?v=8"></script>
+    <script src="index.js?v=9"></script>
 
 </body>
 </html>
