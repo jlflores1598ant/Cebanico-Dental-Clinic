@@ -3,6 +3,27 @@
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
     
+    // 0. Dark Mode Toggle System
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.documentElement; 
+    
+    // Safety check just in case inline script missed it
+    if (localStorage.getItem('theme') === 'dark') {
+        body.setAttribute('data-theme', 'dark');
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    }
+
     // 1. Mobile Menu Toggle
     const hamburger = document.getElementById('hamburger');
     const navLinksContainer = document.getElementById('navLinks');
@@ -53,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let current = "";
         sections.forEach((section) => {
             const sectionTop = section.offsetTop;
-            // Adjustment factor slightly increased to match the newly added padding top
             if (window.scrollY >= sectionTop - 150) {
                 current = section.getAttribute("id");
             }

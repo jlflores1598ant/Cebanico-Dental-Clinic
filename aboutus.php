@@ -8,10 +8,15 @@ $year = date("Y");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us | Cebanico Dental Clinic</title>
 
-    <!-- Favicon Added -->
     <link rel="icon" type="image/png" href="Images/Faviconlogo.png">
 
-    <link rel="stylesheet" href="styles.css?v=17">
+    <script>
+        // Prevent FOUC (Flash of Unstyled Content) by checking theme early
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+    <link rel="stylesheet" href="styles.css?v=19">
 </head>
 <body>
 
@@ -21,18 +26,25 @@ $year = date("Y");
                 <img src="Images/PRIMARY-LOGO.png" alt="Cebanico Dental Clinic Logo">
             </a>
             
-            <div class="hamburger" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+            <div class="nav-right">
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="index.php#home">Home</a></li>
+                    <li><a href="index.php#services">Services</a></li>
+                    <li><a href="aboutus.php" class="active">About</a></li>
+                    <li><a href="index.php#contact" class="nav-contact-btn">Contact</a></li>
+                </ul>
+                
+                <div class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Theme">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </div>
 
-            <ul class="nav-links" id="navLinks">
-                <li><a href="index.php#home">Home</a></li>
-                <li><a href="index.php#services">Services</a></li>
-                <li><a href="aboutus.php" class="active">About</a></li>
-                <li><a href="index.php#contact" class="nav-contact-btn">Contact</a></li>
-            </ul>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
         </nav>
     </header>
 
@@ -45,8 +57,11 @@ $year = date("Y");
             <div class="about-grid">
 
                 <div class="about-image-col fade-in-left">
-                    <div class="image-frame">
-                        <img src="Images/DENTISTIMG.jpg" alt="Our Clinic">
+                    <div class="about-image-wrapper">
+                        <div class="image-frame">
+                            <img src="Images/DENTISTIMG.jpg" alt="Our Clinic">
+                        </div>
+                        <div class="doctor-caption">Doc. Ma. Althez A. Cebanico</div>
                     </div>
                 </div>
 
@@ -162,16 +177,15 @@ $year = date("Y");
                         </div>
                     </div>
                 </div>
-
             </div>
-           
+            
             <div class="footer-bottom">
                 <p>&copy; <?php echo date("Y"); ?> Cebanico Dental Clinic. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script src="index.js?v=17"></script>
+    <script src="index.js?v=19"></script>
 
 </body>
 </html>
