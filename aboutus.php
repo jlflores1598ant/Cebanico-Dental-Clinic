@@ -8,6 +8,9 @@ $year = date("Y");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us | Cebanico Dental Clinic</title>
 
+    <!-- Favicon Added -->
+    <link rel="icon" type="image/png" href="Images/Faviconlogo.png">
+
     <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
@@ -28,7 +31,7 @@ $year = date("Y");
                 <li><a href="index.php#home">Home</a></li>
                 <li><a href="index.php#services">Services</a></li>
                 <li><a href="aboutus.php" class="active">About</a></li>
-                <li><a href="#contact" class="nav-contact-btn">Contact</a></li>
+                <li><a href="index.php#contact" class="nav-contact-btn">Contact</a></li>
             </ul>
         </nav>
     </header>
@@ -159,8 +162,9 @@ $year = date("Y");
                         </div>
                     </div>
                 </div>
+
             </div>
-            
+           
             <div class="footer-bottom">
                 <p>&copy; <?php echo date("Y"); ?> Cebanico Dental Clinic. All rights reserved.</p>
             </div>
