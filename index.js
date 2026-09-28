@@ -1,63 +1,43 @@
 /* =========================
-   Hamburger Menu & Mobile Nav
-========================= */
-const hamburger = document.getElementById('hamburger');
-const navLinksContainer = document.getElementById('navLinks');
-const navLinksItems = document.querySelectorAll('.nav-links a');
-
-hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    navLinksContainer.classList.toggle('active');
-});
-
-navLinksItems.forEach(link => {
-    link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navLinksContainer.classList.remove('active');
-    });
-});
-
-/* =========================
-   Scroll Reveal Animations
-========================= */
-function reveal() {
-    var reveals = document.querySelectorAll(".reveal");
-    for (var i = 0; i < reveals.length; i++) {
-        var windowHeight = window.innerHeight;
-        var elementTop = reveals[i].getBoundingClientRect().top;
-        var elementVisible = 100;
-        if (elementTop < windowHeight - elementVisible) {
-            reveals[i].classList.add("active");
-        }
-    }
-}
-window.addEventListener("scroll", reveal);
-reveal(); // Trigger on load
-
-/* =========================
-   Mobile Footer Accordion
-========================= */
-const footerHeaders = document.querySelectorAll('.footer-col h3');
-
-footerHeaders.forEach(header => {
-    header.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            const parentCol = header.parentElement;
-            const icon = header.querySelector('.toggle-icon');
-            parentCol.classList.toggle('active');
-            if (parentCol.classList.contains('active')) {
-                icon.textContent = '-';
-            } else {
-                icon.textContent = '+';
-            }
-        }
-    });
-});
-
-/* =========================
-   Scrollspy & Perfect Home Click
+   Unified Global Script
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. Mobile Menu Toggle
+    const hamburger = document.getElementById('hamburger');
+    const navLinksContainer = document.getElementById('navLinks');
+    const navLinksItems = document.querySelectorAll('.nav-links a');
+
+    if (hamburger && navLinksContainer) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinksContainer.classList.toggle('active');
+        });
+
+        navLinksItems.forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinksContainer.classList.remove('active');
+            });
+        });
+    }
+
+    // 2. Mobile Footer Accordion
+    const footerHeaders = document.querySelectorAll('.footer-col h3');
+    footerHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                const parentCol = header.parentElement;
+                const icon = header.querySelector('.toggle-icon');
+                parentCol.classList.toggle('active');
+                if (icon) {
+                    icon.textContent = parentCol.classList.contains('active') ? '-' : '+';
+                }
+            }
+        });
+    });
+
+    // 3. Scrollspy & Smooth Scrolling for Home link
     const sections = document.querySelectorAll("section, footer"); 
     const navLinks = document.querySelectorAll(".nav-links a");
 
@@ -73,8 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let current = "";
         sections.forEach((section) => {
             const sectionTop = section.offsetTop;
-            // Adjusted offset since we removed scroll-padding-top in CSS
-            if (window.scrollY >= sectionTop - 50) {
+            // Adjustment factor slightly increased to match the newly added padding top
+            if (window.scrollY >= sectionTop - 150) {
                 current = section.getAttribute("id");
             }
         });
@@ -83,21 +63,89 @@ document.addEventListener("DOMContentLoaded", () => {
 
         navLinks.forEach((link) => {
             link.classList.remove("active");
-            const href = link.getAttribute("href").replace("#", "");
-            if (href === current) link.classList.add("active");
+            const href = link.getAttribute("href");
+            if (href && href.includes("#")) {
+                const targetId = href.replace("#", "");
+                if (targetId === current) link.classList.add("active");
+            }
         });
     });
+
+    // 4. Hero Slider Initialization
+    const slides = document.getElementsByClassName("slide");
+    if (slides.length > 0) {
+        showSlides(slideIndex);
+        startSliderTimer();
+
+        const heroSection = document.querySelector('.hero-slider');
+        if (heroSection) {
+            heroSection.addEventListener('mouseenter', () => isHeroHovered = true);
+            heroSection.addEventListener('mouseleave', () => { 
+                isHeroHovered = false; 
+                resetSliderTimer(); 
+            });
+        }
+    }
+
+    // 5. 3D Services Carousel Initialization
+    const carouselItems = document.querySelectorAll('.carousel-item');
+    if (carouselItems.length > 0) {
+        requestAnimationFrame(renderCarousel);
+        
+        const carouselContainer = document.getElementById('servicesCarousel');
+        if (carouselContainer) {
+            carouselContainer.addEventListener('mouseenter', () => isHovered = true);
+            carouselContainer.addEventListener('mouseleave', () => isHovered = false);
+        }
+    }
+
+    // 6. About Us Highlights Automatic Slideshow
+    const highlightSlides = document.querySelectorAll(".highlight-slide");
+    if (highlightSlides.length >= 2) {
+        let currentHighlight = 0;
+        setInterval(() => {
+            const next = (currentHighlight + 1) % highlightSlides.length;
+            const oldSlide = highlightSlides[currentHighlight];
+            const newSlide = highlightSlides[next];
+
+            newSlide.style.transition = "none";
+            newSlide.classList.remove("prev");
+            void newSlide.offsetWidth;
+            newSlide.style.transition = "";
+
+            oldSlide.classList.remove("active");
+            oldSlide.classList.add("prev");
+            newSlide.classList.add("active");
+
+            currentHighlight = next;
+        }, 3000);
+    }
+
 });
 
 /* =========================
-   Hero Slider Functionality
+   Global Scroll Reveal
+========================= */
+function reveal() {
+    var reveals = document.querySelectorAll(".reveal");
+    for (var i = 0; i < reveals.length; i++) {
+        var windowHeight = window.innerHeight;
+        var elementTop = reveals[i].getBoundingClientRect().top;
+        var elementVisible = 100;
+        if (elementTop < windowHeight - elementVisible) {
+            reveals[i].classList.add("active");
+        }
+    }
+}
+window.addEventListener("scroll", reveal);
+reveal();
+
+/* =========================
+   Hero Slider Functions
 ========================= */
 let slideIndex = 1;
 let slideInterval;
 let isHeroHovered = false; 
-
-showSlides(slideIndex);
-startSliderTimer();
 
 function changeSlide(n) { showSlides(slideIndex += n); resetSliderTimer(); }
 function currentSlide(n) { showSlides(slideIndex = n); resetSliderTimer(); }
@@ -109,16 +157,17 @@ function showSlides(n) {
     let prevBtn = document.querySelector(".prev");
     let nextBtn = document.querySelector(".next");
     
+    if (slides.length === 0) return;
+
     if (n > slides.length) { slideIndex = 1; }
     if (n < 1) { slideIndex = slides.length; }
     
     for (i = 0; i < slides.length; i++) slides[i].classList.remove("active");
     for (i = 0; i < dots.length; i++) dots[i].classList.remove("active");
     
-    if (slides.length > 0) slides[slideIndex - 1].classList.add("active");
+    slides[slideIndex - 1].classList.add("active");
     if (dots.length > 0) dots[slideIndex - 1].classList.add("active");
 
-    // Re-trigger animation for hero text on slide change
     const activeRevealElements = slides[slideIndex - 1].querySelectorAll('.reveal');
     activeRevealElements.forEach(el => {
         el.classList.remove('active');
@@ -138,29 +187,27 @@ function startSliderTimer() {
     }, 5000); 
 }
 
-function resetSliderTimer() { clearInterval(slideInterval); startSliderTimer(); }
-
-const heroSection = document.querySelector('.hero-slider');
-if (heroSection) {
-    heroSection.addEventListener('mouseenter', () => isHeroHovered = true);
-    heroSection.addEventListener('mouseleave', () => { isHeroHovered = false; resetSliderTimer(); });
+function resetSliderTimer() { 
+    clearInterval(slideInterval); 
+    startSliderTimer(); 
 }
 
 /* ========================================================
    Services True Infinite 3D Carousel (Absolute Math Engine)
 ======================================================== */
-const carouselItems = document.querySelectorAll('.carousel-item');
-const totalItems = carouselItems.length;
 let absoluteFloatIndex = 0;   
 let targetAbsoluteIndex = null; 
 let isHovered = false;        
 let isModalOpen = false;  
 let isPausedByClick = false; 
 let clickPauseTimeout;       
-const autoSpeed = 0.004;     
+const autoSpeed = 0.004;    
 
 function renderCarousel() {
+    const carouselItems = document.querySelectorAll('.carousel-item');
+    const totalItems = carouselItems.length;
     if (totalItems === 0) return;
+
     if (targetAbsoluteIndex !== null) {
         absoluteFloatIndex += (targetAbsoluteIndex - absoluteFloatIndex) * 0.08;
         if (Math.abs(targetAbsoluteIndex - absoluteFloatIndex) < 0.005) {
@@ -181,7 +228,7 @@ function renderCarousel() {
         let absDiff = Math.abs(diff);
         let translateX = diff * 200;            
         let translateZ = -absDiff * 250;        
-        let rotateY = -diff * 12;               
+        let rotateY = -diff * 12;              
         let scale = Math.max(0.6, 1 - absDiff * 0.1); 
         let opacity = Math.max(0, 1 - absDiff * 0.35);
         let zIndex = Math.round(100 - absDiff * 10);
@@ -199,12 +246,6 @@ function renderCarousel() {
     requestAnimationFrame(renderCarousel);
 }
 
-const carouselContainer = document.getElementById('servicesCarousel');
-if (carouselContainer) {
-    carouselContainer.addEventListener('mouseenter', () => isHovered = true);
-    carouselContainer.addEventListener('mouseleave', () => isHovered = false);
-}
-
 function pauseCarouselTemporarily() {
     isPausedByClick = true;
     clearTimeout(clickPauseTimeout); 
@@ -212,6 +253,10 @@ function pauseCarouselTemporarily() {
 }
 
 function navigateCarousel(direction) {
+    const carouselItems = document.querySelectorAll('.carousel-item');
+    const totalItems = carouselItems.length;
+    if (totalItems === 0) return;
+
     let currentCenter = Math.round(absoluteFloatIndex);
     if (targetAbsoluteIndex !== null) currentCenter = targetAbsoluteIndex;
     targetAbsoluteIndex = currentCenter + direction;
@@ -219,6 +264,10 @@ function navigateCarousel(direction) {
 }
 
 function handleCarouselClick(clickedIndex, title, desc) {
+    const carouselItems = document.querySelectorAll('.carousel-item');
+    const totalItems = carouselItems.length;
+    if (totalItems === 0) return;
+
     let currentCenter = Math.round(absoluteFloatIndex);
     if (targetAbsoluteIndex !== null) currentCenter = targetAbsoluteIndex;
     let currentNormalized = ((currentCenter % totalItems) + totalItems) % totalItems;
@@ -235,30 +284,32 @@ function handleCarouselClick(clickedIndex, title, desc) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    if (carouselItems.length > 0) requestAnimationFrame(renderCarousel);
-});
-
 /* =========================
    Modal Functionality
 ========================= */
-const modal = document.getElementById("serviceModal");
-const modalTitle = document.getElementById("modalTitle");
-const modalDesc = document.getElementById("modalDesc");
-
 function openModal(title, description) {
-    modalTitle.innerText = title;
-    modalDesc.innerText = description;
-    modal.style.display = "block";
-    isModalOpen = true; 
+    const modal = document.getElementById("serviceModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalDesc = document.getElementById("modalDesc");
+
+    if (modal && modalTitle && modalDesc) {
+        modalTitle.innerText = title;
+        modalDesc.innerText = description;
+        modal.style.display = "block";
+        isModalOpen = true; 
+    }
 }
 
 function closeModal() {
-    modal.style.display = "none";
-    isModalOpen = false; 
+    const modal = document.getElementById("serviceModal");
+    if (modal) {
+        modal.style.display = "none";
+        isModalOpen = false; 
+    }
 }
 
 window.onclick = function(event) {
+    const modal = document.getElementById("serviceModal");
     if (event.target == modal) {
         modal.style.display = "none";
         isModalOpen = false;
@@ -268,12 +319,14 @@ window.onclick = function(event) {
 /* =========================
    Back to Top Functionality
 ========================= */
-const backToTopBtn = document.getElementById("backToTopBtn");
 window.addEventListener("scroll", () => {
-    if (window.scrollY > 300) {
-        backToTopBtn.classList.add("show");
-    } else {
-        backToTopBtn.classList.remove("show");
+    const backToTopBtn = document.getElementById("backToTopBtn");
+    if (backToTopBtn) {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.add("show");
+        } else {
+            backToTopBtn.classList.remove("show");
+        }
     }
 });
 

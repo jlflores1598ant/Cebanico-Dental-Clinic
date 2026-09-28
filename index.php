@@ -65,22 +65,20 @@ $services = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cebanico Dental Clinic</title>
     
-    <!-- Favicon Added -->
-    <link rel="icon" type="image/png" href="Images/PRIMARY-LOGO.png">
+    <link rel="icon" type="image/png" href="Images/Faviconlogo.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Cache Busting Link to CSS -->
-    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
 
     <header class="floating-header">
         <nav>
             <a href="#home" class="logo">
-                <img src="Images/PRIMARY-LOGO.png" alt="MyWebsite Logo">
+                <img src="Images/PRIMARY-LOGO.png" alt="Cebanico Dental Clinic Logo">
             </a>
             
             <div class="hamburger" id="hamburger">
@@ -92,7 +90,7 @@ $services = [
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home" class="active">Home</a></li>
                 <li><a href="#services">Services</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="aboutus.php">About</a></li>
                 <li><a href="#contact" class="nav-contact-btn">Contact</a></li>
             </ul>
         </nav>
@@ -101,7 +99,6 @@ $services = [
     <section class="hero-slider" id="home">
         <div class="slider-container">
 
-            <!-- Slide 1 -->
             <div class="slide active">
                 <div class="slide-overlay-gradient"></div>
                 <img src="Images/FrontDeskWlogo.png" alt="Slide 1">
@@ -111,12 +108,11 @@ $services = [
                     <p>We’re here to keep your smiles bright with professional, compassionate care.</p>
                     <div class="buttons">
                         <a href="#services" class="btn btn-primary">Explore Services</a>
-                        <a href="#about" class="btn btn-secondary">Learn More</a>
+                        <a href="aboutus.php" class="btn btn-secondary">Learn More</a>
                     </div>
                 </div>
             </div> 
 
-            <!-- Slide 2 -->
             <div class="slide">
                 <div class="slide-overlay-gradient"></div>
                 <img src="Images/OutsideClinic.png" alt="Slide 2">
@@ -260,7 +256,7 @@ $services = [
         </div>
     </footer>
 
-    <script src="index.js?v=15"></script>
+    <script src="index.js?v=17"></script>
 
 </body>
 </html>
