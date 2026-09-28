@@ -3,37 +3,42 @@
 $services = [
     [
         "title" => "Consultation",
-        "desc" => "Comprehensive dental checkup, x-ray reviews, and personalized treatment planning to ensure your optimal oral health.",
+        "desc" => "Comprehensive dental checkup, x-ray reviews, and personalized treatment planning to ensure your optimal oral health. | ⏱ Estimated Time: 30 mins",
         "img" => "Images/Consultation.jpg"
     ],
     [
         "title" => "Oral Prophylaxis (Cleaning)",
-        "desc" => "Professional teeth cleaning to remove plaque, tartar, and stains, preventing cavities and gum disease.",
+        "desc" => "Professional teeth cleaning to remove plaque, tartar, and stains, preventing cavities and gum disease. | ⏱ Estimated Time: 40 mins",
         "img" => "Images/Cleaning.jpg"
     ],
     [
         "title" => "Tooth Extraction (Bunot)",
-        "desc" => "Safe and painless removal of damaged, severely decayed, or problematic teeth, including wisdom teeth extraction.",
+        "desc" => "Safe and painless removal of damaged, severely decayed, or problematic teeth, including wisdom teeth extraction. | ⏱ Estimated Time: 45 mins",
         "img" => "Images/Extraction.jpg"
     ],
     [
         "title" => "Tooth Restoration (Pasta)",
-        "desc" => "High-quality tooth-colored composite fillings to repair cavities, chipped teeth, and restore your natural smile.",
+        "desc" => "High-quality tooth-colored composite fillings to repair cavities, chipped teeth, and restore your natural smile. | ⏱ Estimated Time: 55 mins",
         "img" => "Images/Restoration(PASTA).jpg"
     ],
     [
         "title" => "Dentures (Pustiso)",
-        "desc" => "Custom-fitted removable partial or complete dentures to replace missing teeth and restore chewing function.",
+        "desc" => "Custom-fitted removable partial or complete dentures to replace missing teeth and restore chewing function. | ⏱ Estimated Time: 40 mins",
         "img" => "Images/Denture.jpg"
     ],
     [
         "title" => "Teeth Whitening",
-        "desc" => "Professional bleaching treatments to safely and effectively brighten discolored or stained teeth.",
+        "desc" => "Professional bleaching treatments to safely and effectively brighten discolored or stained teeth. | ⏱ Estimated Time: 90 mins",
         "img" => "Images/Whitening.jpg"
     ],
     [
-        "title" => "Braces",
-        "desc" => "Orthodontic treatment setup using metal or ceramic brackets to correct misaligned teeth and bite issues.",
+        "title" => "Braces Installation",
+        "desc" => "Orthodontic treatment setup using metal or ceramic brackets to correct misaligned teeth and bite issues. | ⏱ Estimated Time: 80 mins",
+        "img" => "Images/Braces.png"
+    ],
+    [
+        "title" => "Braces Adjustment",
+        "desc" => "Routine orthodontic visits to tighten wires, monitor progress, and ensure proper teeth alignment. | ⏱ Estimated Time: 30 mins",
         "img" => "Images/Braces.png"
     ],
     [
@@ -43,12 +48,12 @@ $services = [
     ],
     [
         "title" => "Root Canal Treatment",
-        "desc" => "Endodontic therapy to save severely infected or decaying teeth by cleaning out the infected pulp and sealing it.",
+        "desc" => "Endodontic therapy to save severely infected or decaying teeth by cleaning out the infected pulp and sealing it. | ⏱ Estimated Time: 100 mins",
         "img" => "Images/RootCanal.jpg"
     ],
     [
         "title" => "Fixed Bridge - Tooth Preparation",
-        "desc" => "Preparation and placement of permanent prosthetic bridges to seamlessly fill the gaps left by missing teeth.",
+        "desc" => "Preparation and placement of permanent prosthetic bridges to seamlessly fill the gaps left by missing teeth. | ⏱ Estimated Time: 60 mins",
         "img" => "Images/FixedBridge.jpg"
     ]
 ];
@@ -60,12 +65,15 @@ $services = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cebanico Dental Clinic</title>
     
+    <!-- Favicon Added -->
+    <link rel="icon" type="image/png" href="Images/PRIMARY-LOGO.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Cache Busting Link to CSS -->
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
 
@@ -176,7 +184,7 @@ $services = [
                 <?php } ?>
             </div>
             
-            <div class="carousel-controls reveal">
+            <div class="carousel-controls">
                 <button onclick="navigateCarousel(-1)"><span>&#10094;</span> Prev</button>
                 <button onclick="navigateCarousel(1)">Next <span>&#10095;</span></button>
             </div>
@@ -191,7 +199,11 @@ $services = [
         </div>
     </div>
 
-    <button id="backToTopBtn" aria-label="Back to Top" onclick="scrollToTop()">&#8679;</button>
+    <button id="backToTopBtn" aria-label="Back to Top" onclick="scrollToTop()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 15l-6-6-6 6"/>
+        </svg>
+    </button>
 
     <footer id="contact">
         <div class="container reveal">
@@ -248,7 +260,7 @@ $services = [
         </div>
     </footer>
 
-    <script src="index.js?v=8"></script>
+    <script src="index.js?v=15"></script>
 
 </body>
 </html>
