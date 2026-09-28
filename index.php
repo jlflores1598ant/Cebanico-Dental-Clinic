@@ -60,89 +60,89 @@ $services = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cebanico Dental Clinic</title>
     
-    <!-- Link to external CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Cache Busting Link to CSS -->
+    <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
 
-    <!-- Navigation -->
-    <header>
-        <div class="container">
-            <nav>
-                <a href="#home" class="logo">
-                    <img src="Images/PRIMARY-LOGO.png" alt="MyWebsite Logo">
-                </a>
-                
-                <!-- Hamburger Icon -->
-                <div class="hamburger" id="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
+    <header class="floating-header">
+        <nav>
+            <a href="#home" class="logo">
+                <img src="Images/PRIMARY-LOGO.png" alt="MyWebsite Logo">
+            </a>
+            
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
 
-                <ul class="nav-links" id="navLinks">
-                    <li><a href="#home" class="active">Home</a></li>
-                    <li><a href="#services">Services</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact" class="nav-contact-btn">Contact</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <!-- Merged Hero Slider -->
     <section class="hero-slider" id="home">
         <div class="slider-container">
 
-            <!-- Slide 1 Background and Content -->
+            <!-- Slide 1 -->
             <div class="slide active">
-                <img src="Images/FrontDeskWlogo.png" alt="Slide 1" >
-                <div class="slide-content-overlay">
+                <div class="slide-overlay-gradient"></div>
+                <img src="Images/FrontDeskWlogo.png" alt="Slide 1">
+                <div class="slide-content-overlay reveal">
+                    <span class="eyebrow-text">Cebanico Dental Clinic</span>
                     <h1>Mabuhay, <span class="hero-highlight">Welcome!</span></h1>
-                    <p>We’re here to keep your smiles bright!</p>
+                    <p>We’re here to keep your smiles bright with professional, compassionate care.</p>
                     <div class="buttons">
-                        <a href="#services" class="btn btn-primary">Get Started</a>
+                        <a href="#services" class="btn btn-primary">Explore Services</a>
                         <a href="#about" class="btn btn-secondary">Learn More</a>
                     </div>
                 </div>
             </div> 
 
-            <!-- Slide 2 Background and Content (Clinic Hours) -->
+            <!-- Slide 2 -->
             <div class="slide">
-                <img src="Images/OutsideClinic.png" alt="Slide 2" >
-                
-                <div class="slide-content-overlay slide-split">
-                    <!-- Upgraded Aesthetic Title on the left -->
+                <div class="slide-overlay-gradient"></div>
+                <img src="Images/OutsideClinic.png" alt="Slide 2">
+                <div class="slide-content-overlay wide-overlay slide-split reveal">
+                    
                     <div class="split-left aesthetic-left">
                         <span class="eyebrow-text">Plan Your Visit</span>
                         <h1>Clinic <span class="hero-highlight">Hours</span></h1>
                         <p class="desktop-only-p">We are dedicated to providing top-tier dental care. Check our schedule to drop by, or book a private appointment for specialized treatments.</p>
                     </div>
                     
-                    <!-- Content on the right -->
                     <div class="split-right">
-                        <ul class="schedule-list">
-                            <li><span>Monday:</span> 10AM – 6PM</li>
-                            <li><span>Tuesday:</span> 10AM – 6PM</li>
-                            <li><span>Wednesday:</span> 10AM – 6PM</li>
-                            <li><span>Thursday:</span> Closed</li>
-                            <li><span>Friday:</span> Strictly by Appointment</li>
-                            <li><span>Saturday:</span> 10AM – 6PM</li>
-                            <li><span>Sunday:</span> 10AM – 6PM</li>
-                        </ul>
-                        <div class="buttons">
-                            <a href="#contact" class="btn btn-primary">Book Appointment</a>
-                            <a href="tel:+639563708675" class="btn btn-secondary">Call Us Now</a>
+                        <div class="glass-card schedule-card">
+                            <ul class="schedule-list">
+                                <li><span>Monday:</span> 10AM – 6PM</li>
+                                <li><span>Tuesday:</span> 10AM – 6PM</li>
+                                <li><span>Wednesday:</span> 10AM – 6PM</li>
+                                <li><span>Thursday:</span> Closed</li>
+                                <li><span>Friday:</span> Strictly by Appointment</li>
+                                <li><span>Saturday:</span> 10AM – 6PM</li>
+                                <li><span>Sunday:</span> 10AM – 6PM</li>
+                            </ul>
+                            <div class="buttons">
+                                <a href="#contact" class="btn btn-primary">Book Appointment</a>
+                            </div>
                         </div>
                     </div>
+                    
                 </div>
             </div>
 
-            <!-- Navigation Controls -->
             <a class="prev" role="button" tabindex="0" onclick="changeSlide(-1)" aria-label="Previous Slide">&#10094;</a>
             <a class="next" role="button" tabindex="0" onclick="changeSlide(1)" aria-label="Next Slide">&#10095;</a>
 
-            <!-- Slider Dots -->
             <div class="slider-dots">
                 <span class="dot active" onclick="currentSlide(1)"></span>
                 <span class="dot" onclick="currentSlide(2)"></span>
@@ -151,15 +151,15 @@ $services = [
         </div>
     </section>
 
-    <!-- Services Section (Infinite 3D Carousel) -->
-    <section class="services" id="services">
-        <div class="container">
+    <section class="services section-grid-bg" id="services">
+        <div class="container reveal">
             <div class="section-title">
-                <h2>Our Services</h2>
+                <span class="eyebrow-text center-eyebrow">What We Do</span>
+                <h2>Our <span class="hero-highlight">Services</span></h2>
+                <p>Comprehensive dental solutions tailored to give you the perfect smile.</p>
             </div>
             
             <div class="carousel-container" id="servicesCarousel">
-                
                 <?php 
                 foreach ($services as $index => $service) { 
                     $safeTitle = htmlspecialchars($service['title'], ENT_QUOTES);
@@ -174,42 +174,35 @@ $services = [
                         </div>
                     </div>
                 <?php } ?>
-                
             </div>
             
-            <div class="carousel-controls">
+            <div class="carousel-controls reveal">
                 <button onclick="navigateCarousel(-1)"><span>&#10094;</span> Prev</button>
                 <button onclick="navigateCarousel(1)">Next <span>&#10095;</span></button>
             </div>
         </div>
     </section>
 
-    <!-- Modal for Service Descriptions -->
     <div id="serviceModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content glass-modal">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <h2 id="modalTitle">Service Title</h2>
             <p id="modalDesc">Service description goes here.</p>
         </div>
     </div>
 
-    <!-- Back to Top Button -->
     <button id="backToTopBtn" aria-label="Back to Top" onclick="scrollToTop()">&#8679;</button>
 
-    <!-- Compact Contact / Footer -->
     <footer id="contact">
-        <div class="container">
+        <div class="container reveal">
             <div class="footer-top">
-                
-                <!-- Column 1: Info -->
                 <div class="footer-col">
                     <h3>Get in Touch <span class="toggle-icon">+</span></h3>
                     <div class="footer-content">
-                        <p>Have questions or ready to get started? Reach out to us.</p>
+                        <p>Have questions or ready to get started? Reach out to us. Your perfect smile is just a call away.</p>
                     </div>
                 </div>
                 
-                <!-- Column 2: Location (Middle) -->
                 <div class="footer-col">
                     <h3>Visit Us <span class="toggle-icon">+</span></h3>
                     <div class="footer-content">
@@ -222,7 +215,6 @@ $services = [
                     </div>
                 </div>
 
-                <!-- Column 3: Contact Details & Socials -->
                 <div class="footer-col">
                     <h3>Contact <span class="toggle-icon">+</span></h3>
                     <div class="footer-content">
@@ -236,7 +228,7 @@ $services = [
                             <div class="contact-item social-icons">
                                 <a href="https://www.facebook.com/cebanicodental" target="_blank" class="social-link">
                                     <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.312h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
-                                    Cebanico Dental Clinic
+                                    Cebanico Dental
                                 </a>
                             </div>
                             <div class="contact-item social-icons">
@@ -248,7 +240,6 @@ $services = [
                         </div>
                     </div>
                 </div>
-
             </div>
             
             <div class="footer-bottom">
@@ -257,8 +248,7 @@ $services = [
         </div>
     </footer>
 
-    <!-- Link to external JavaScript -->
-    <script src="index.js"></script>
+    <script src="index.js?v=8"></script>
 
 </body>
 </html>
