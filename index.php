@@ -77,15 +77,14 @@ $services = [
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=19">
+    <link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body>
 
     <header class="floating-header">
         <nav>
             <a href="#home" class="logo">
-                <img src="Images/PRIMARY-LOGO.png" alt="Cebanico Dental Clinic Logo" class="logo-light">
-                <img src="Images/PRIMARY-LOGO-WHITE.png" alt="Cebanico Dental Clinic Logo" class="logo-dark">
+                <img src="Images/PRIMARY-LOGO.png" alt="Cebanico Dental Clinic Logo" class="main-nav-logo">
             </a>
             
             <div class="nav-right">
@@ -272,7 +271,7 @@ $services = [
         </div>
     </footer>
 
-    <script src="index.js?v=19"></script>
+    <script src="index.js?v=20"></script>
 
 </body>
 </html>
