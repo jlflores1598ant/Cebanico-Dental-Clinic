@@ -84,7 +84,8 @@ $services = [
     <header class="floating-header">
         <nav>
             <a href="#home" class="logo">
-                <img src="Images/PRIMARY-LOGO.png" alt="Cebanico Dental Clinic Logo">
+                <img src="Images/PRIMARY-LOGO.png" alt="Cebanico Dental Clinic Logo" class="logo-light">
+                <img src="Images/PRIMARY-LOGO-WHITE.png" alt="Cebanico Dental Clinic Logo" class="logo-dark">
             </a>
             
             <div class="nav-right">
