@@ -137,6 +137,7 @@ $year = date("Y");
                     <h3>Get in Touch <span class="toggle-icon">+</span></h3>
                     <div class="footer-content">
                         <p>Have questions or ready to get started? Reach out to us. Your perfect smile is just a call away.</p>
+                        <a href="inquiry.php" class="inquiry-btn">Submit an Inquiry &rarr;</a>
                     </div>
                 </div>
                 
@@ -145,13 +146,12 @@ $year = date("Y");
                     <div class="footer-content">
                         <div class="footer-contact-links">
                             <div class="contact-item">
-                                <span>📍</span>
-                                <a href="https://maps.app.goo.gl/WMmEotM1g4ev1zdP8" target="_blank">Cebanico Dental Clinic</a>
+                                <span>📍</span> 
+                                <a href="https://maps.app.goo.gl/WMmEotM1g4ev1zdP8" target="_blank">0176 Manila E Rd, Binangonan, Rizal</a>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="footer-col">
                     <h3>Contact <span class="toggle-icon">+</span></h3>
                     <div class="footer-content">
@@ -184,7 +184,6 @@ $year = date("Y");
             </div>
         </div>
     </footer>
-
     <script src="index.js?v=20"></script>
 
 </body>
