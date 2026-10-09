@@ -224,6 +224,7 @@ nav {
 .hero-highlight {
     background: var(--primary-gradient);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }
@@ -351,14 +352,13 @@ nav {
 .about-image-col { flex: 0 0 auto; display: flex; justify-content: center; margin: 0 auto; }
 
 .about-image-wrapper { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-/* Image width and height slightly reduced here */
 .image-frame {
     width: 330px; height: 420px; max-width: 100%; border-radius: 50%; overflow: hidden;
     border: 6px solid var(--bg-body); outline: 2px solid var(--primary); outline-offset: 8px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: border-color 0.4s ease;
 }
 .image-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
-.doctor-caption { font-family: var(--font-heading); font-weight: 700;  font-size: 1.25rem;  /* Applies the exact same gradient effect used on your hero highlight text */ background: var(--primary-gradient);-webkit-background-clip: text; -webkit-text-fill-color: transparent;display: inline-block;text-align: center; letter-spacing: -0.3px; 
+.doctor-caption { font-family: var(--font-heading); font-weight: 700;  font-size: 1.25rem;  background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;display: inline-block;text-align: center; letter-spacing: -0.3px; 
 }
 
 .about-text-box {
