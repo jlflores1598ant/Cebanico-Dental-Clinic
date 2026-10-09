@@ -77,7 +77,7 @@ $services = [
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=20">
+    <link rel="stylesheet" href="styles.css?v=21">
 </head>
 <body>
 
@@ -92,7 +92,7 @@ $services = [
                     <li><a href="#home" class="active">Home</a></li>
                     <li><a href="#services">Services</a></li>
                     <li><a href="aboutus.php">About</a></li>
-                    <li><a href="#contact" class="nav-contact-btn">Contact</a></li>
+                    <li><a href="appointment.php" class="nav-contact-btn">Book Appointment</a></li>
                 </ul>
                 
                 <div class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Theme">
@@ -151,7 +151,7 @@ $services = [
                                 <li><span>Sunday:</span> 10AM – 6PM</li>
                             </ul>
                             <div class="buttons">
-                                <a href="#contact" class="btn btn-primary">Book Appointment</a>
+                                <a href="appointment.php" class="btn btn-primary">Book Appointment</a>
                             </div>
                         </div>
                     </div>
@@ -223,7 +223,7 @@ $services = [
                     <h3>Get in Touch <span class="toggle-icon">+</span></h3>
                     <div class="footer-content">
                         <p>Have questions or ready to get started? Reach out to us. Your perfect smile is just a call away.</p>
-                        <a href="inquiry.php" class="inquiry-btn">Submit an Inquiry &rarr;</a>
+                        <a href="appointment.php" class="inquiry-btn">Book an Appointment &rarr;</a>
                     </div>
                 </div>
                 
@@ -270,7 +270,7 @@ $services = [
             </div>
         </div>
     </footer>
-    <script src="index.js?v=20"></script>
+    <script src="index.js?v=21"></script>
 
 </body>
 </html>
