@@ -93,7 +93,7 @@ $services = [
                     
                     <div class="form-group">
                         <label for="fullName">Full name</label>
-                        <input type="text" id="fullName" name="fullName" placeholder="Juan Dela Cruz" required>
+                        <input type="text" id="fullName" name="fullName" placeholder="Juan Dela Cruz" pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" required>
                     </div>
 
                     <div class="form-group">
@@ -103,7 +103,7 @@ $services = [
 
                     <div class="form-group">
                         <label for="contactNumber">Contact number</label>
-                        <input type="tel" id="contactNumber" name="contactNumber" placeholder="0917 123 4567" required>
+                        <input type="tel" id="contactNumber" name="contactNumber" placeholder="0917 123 4567" pattern="[0-9]+" title="Only numbers are allowed" required>
                     </div>
 
                     <div class="form-row">
@@ -119,7 +119,7 @@ $services = [
 
                         <div class="form-group half-width">
                             <label for="appointmentDate">Day of appointment</label>
-                            <input type="date" id="appointmentDate" name="appointmentDate" placeholder="mm/dd/yyyy" required>
+                            <input type="date" id="appointmentDate" name="appointmentDate" placeholder="mm/dd/yyyy" min="<?php echo date('Y-m-d'); ?>" required>
                         </div>
                     </div>
 
