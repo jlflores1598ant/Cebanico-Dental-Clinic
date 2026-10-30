@@ -1,19 +1,18 @@
 <?php
-// Database connection settings (XAMPP defaults)
-$db_host = "localhost";
-$db_user = "root";          // default XAMPP username
-$db_pass = "";              // default XAMPP password is EMPTY
-$db_name = "cebanico_dental";
+// InfinityFree Database Credentials
+$host = "sqlXXX.infinityfree.com";         // Replace with your MySQL Host Name
+$user = "if0_3xxxxxxx";                 // Replace with your MySQL User Name
+$password = "your_infinityfree_password"; // Replace with your Account/Panel Password
+$dbname = "if0_3xxxxxxx_cebanico_dental"; // Replace with your Full Database Name
 
-// Make MySQL errors throw exceptions so we can catch them
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+// Create connection using MySQLi
+$conn = new mysqli($host, $user, $password, $dbname);
 
-try {
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-    $conn->set_charset("utf8mb4");
-} catch (mysqli_sql_exception $e) {
-    // Do not show technical details to visitors
-    error_log("DB connection failed: " . $e->getMessage());
-    die("Sorry, we are unable to process requests right now. Please try again later.");
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+
+// Optional: uncomment below to test if it connects successfully
+// echo "Connected successfully";
 ?>

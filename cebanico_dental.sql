@@ -11,7 +11,6 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -69,34 +68,6 @@ CREATE TABLE `appointment_requests` (
 
 INSERT INTO `appointment_requests` (`request_id`, `full_name`, `email`, `contact_number`, `service`, `appointment_date`, `consent`, `submitted_at`) VALUES
 (6, 'Aron Mallari', 'aronmallari123@gmail.com', '09937696068', 'Braces Installation', '2027-03-08', 1, '2026-10-29 17:00:57');
-
--- --------------------------------------------------------
-
---
--- Stand-in structure for view `appointment_schedule`
--- (See below for the actual view)
---
-CREATE TABLE `appointment_schedule` (
-`appointment_id` int(10) unsigned
-,`appointment_date` date
-,`day_of_week` varchar(10)
-,`service` varchar(100)
-,`status` enum('Pending','Confirmed','Completed','Cancelled','No Show')
-,`full_name` varchar(100)
-,`email` varchar(150)
-,`contact_number` varchar(20)
-,`remarks` text
-,`submitted_at` timestamp
-);
-
--- --------------------------------------------------------
-
---
--- Structure for view `appointment_schedule`
---
-DROP TABLE IF EXISTS `appointment_schedule`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `appointment_schedule`  AS SELECT `a`.`appointment_id` AS `appointment_id`, `a`.`appointment_date` AS `appointment_date`, `a`.`day_of_week` AS `day_of_week`, `a`.`service` AS `service`, `a`.`status` AS `status`, `r`.`full_name` AS `full_name`, `r`.`email` AS `email`, `r`.`contact_number` AS `contact_number`, `a`.`remarks` AS `remarks`, `r`.`submitted_at` AS `submitted_at` FROM (`appointments` `a` join `appointment_requests` `r` on(`r`.`request_id` = `a`.`request_id`)) ORDER BY `a`.`appointment_date` ASC, `a`.`appointment_id` ASC ;
 
 --
 -- Indexes for dumped tables
