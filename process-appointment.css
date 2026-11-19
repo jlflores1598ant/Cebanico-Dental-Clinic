@@ -1,0 +1,321 @@
+/* =========================
+   Process Appointment Result Page
+   (works with styles.css + appointment.css)
+========================= */
+:root {
+    --success: #22c55e;
+    --success-soft: rgba(34, 197, 94, 0.15);
+    --error: #f43f5e;
+    --error-soft: rgba(244, 63, 94, 0.15);
+}
+
+/* ---------- Background: slow colour glow behind the card ---------- */
+.result-hero {
+    justify-content: center;
+}
+
+.result-glow {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 20% 25%, rgba(14, 165, 233, 0.35), transparent 45%),
+        radial-gradient(circle at 80% 75%, rgba(99, 102, 241, 0.35), transparent 45%);
+    background-size: 140% 140%;
+    animation: glowShift 12s ease-in-out infinite alternate;
+}
+
+@keyframes glowShift {
+    from { background-position: 0% 0%;   opacity: 0.7; }
+    to   { background-position: 100% 100%; opacity: 1; }
+}
+
+/* ---------- Card ---------- */
+.result-layout {
+    position: relative;
+    z-index: 10;
+    width: 90%;
+    max-width: 580px;
+    margin: auto;
+}
+
+.result-card {
+    position: relative;
+    background: var(--schedule-card-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 45px 40px;
+    text-align: center;
+    color: #e2e8f0;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+/* Coloured top bar that slides in */
+.result-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 5px;
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: barGrow 1s 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.result-card.is-success::before { background: linear-gradient(90deg, #22c55e, #0ea5e9, #6366f1); }
+.result-card.is-error::before   { background: linear-gradient(90deg, #f43f5e, #f59e0b); }
+
+@keyframes barGrow { to { transform: scaleX(1); } }
+
+/* ---------- Fade-in animation (staggered) ---------- */
+.fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.8s cubic-bezier(0.5, 0, 0, 1) forwards;
+}
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.35s; }
+.delay-3 { animation-delay: 0.55s; }
+.delay-4 { animation-delay: 0.75s; }
+.delay-5 { animation-delay: 0.95s; }
+.delay-6 { animation-delay: 1.15s; }
+
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Animated icon ---------- */
+.result-icon {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.4);
+    animation: popIn 0.7s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.result-icon.success { background: var(--success-soft); color: var(--success); }
+.result-icon.error   { background: var(--error-soft);   color: var(--error); }
+
+/* Pulsing ring */
+.result-icon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    opacity: 0;
+    animation: ringPulse 2.4s 0.9s ease-out infinite;
+}
+
+.result-icon svg {
+    width: 48px;
+    height: 48px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.result-icon .draw {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: drawLine 0.7s 0.6s ease forwards;
+}
+.result-icon .draw-2 {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: drawLine 0.6s 0.9s ease forwards;
+}
+
+@keyframes popIn    { to { opacity: 1; transform: scale(1); } }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+@keyframes ringPulse {
+    0%   { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(1.7); }
+}
+
+/* ---------- Text ---------- */
+.result-card h1 {
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+    margin-bottom: 12px;
+}
+
+.result-card .result-sub {
+    font-size: 16px;
+    font-weight: 300;
+    color: #cbd5e1;
+    margin-bottom: 28px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+}
+.status-badge.success { background: var(--success-soft); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+.status-badge.error   { background: var(--error-soft);   color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+
+/* ---------- Appointment details ---------- */
+.details-list {
+    list-style: none;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 6px 22px;
+    margin-bottom: 28px;
+}
+.details-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideIn 0.6s cubic-bezier(0.5, 0, 0, 1) forwards;
+}
+.details-list li:last-child { border-bottom: none; }
+.details-list li:nth-child(1) { animation-delay: 0.7s; }
+.details-list li:nth-child(2) { animation-delay: 0.85s; }
+.details-list li:nth-child(3) { animation-delay: 1.0s; }
+.details-list li:nth-child(4) { animation-delay: 1.15s; }
+
+.details-list .label { color: #a5b4fc; font-weight: 500; white-space: nowrap; }
+.details-list .value { color: #ffffff; font-weight: 500; text-align: right; }
+.details-list .value.ref { color: #38bdf8; font-family: var(--font-heading); letter-spacing: 1px; }
+.details-list .value.pending { color: #fbbf24; }
+
+@keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+
+/* ---------- Error list ---------- */
+.error-list {
+    list-style: none;
+    text-align: left;
+    margin-bottom: 28px;
+}
+.error-list li {
+    position: relative;
+    padding: 12px 16px 12px 44px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #fecdd3;
+    background: var(--error-soft);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideIn 0.6s cubic-bezier(0.5, 0, 0, 1) forwards;
+}
+.error-list li::before {
+    content: "!";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--error);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.error-list li:nth-child(1) { animation-delay: 0.7s; }
+.error-list li:nth-child(2) { animation-delay: 0.85s; }
+.error-list li:nth-child(3) { animation-delay: 1.0s; }
+.error-list li:nth-child(4) { animation-delay: 1.15s; }
+.error-list li:nth-child(5) { animation-delay: 1.3s; }
+.error-list li:nth-child(n+6) { animation-delay: 1.45s; }
+
+/* ---------- Buttons ---------- */
+.result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.result-actions .btn { min-width: 180px; }
+.result-actions .btn-danger {
+    background: linear-gradient(135deg, #f43f5e, #f59e0b);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+}
+.result-actions .btn-danger:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(244, 63, 94, 0.5);
+}
+
+/* ---------- Confetti dots (success only, pure CSS) ---------- */
+.confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.confetti span {
+    position: absolute;
+    top: -12px;
+    width: 8px;
+    height: 14px;
+    border-radius: 2px;
+    opacity: 0;
+    animation: confettiFall 3.2s ease-in forwards;
+}
+.confetti span:nth-child(1) { left: 8%;  background: #0ea5e9; animation-delay: 0.5s; }
+.confetti span:nth-child(2) { left: 22%; background: #6366f1; animation-delay: 0.8s; }
+.confetti span:nth-child(3) { left: 36%; background: #22c55e; animation-delay: 0.6s; }
+.confetti span:nth-child(4) { left: 50%; background: #f59e0b; animation-delay: 1.0s; }
+.confetti span:nth-child(5) { left: 64%; background: #0ea5e9; animation-delay: 0.7s; }
+.confetti span:nth-child(6) { left: 78%; background: #a5b4fc; animation-delay: 0.9s; }
+.confetti span:nth-child(7) { left: 92%; background: #22c55e; animation-delay: 0.55s; }
+
+@keyframes confettiFall {
+    0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(520px) rotate(540deg); }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 480px) {
+    .result-card { padding: 34px 22px; }
+    .result-actions .btn { width: 100%; }
+    .details-list li { font-size: 14px; }
+}
+
+/* ---------- Respect "reduce motion" settings ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .result-glow, .result-card::before, .fade-up, .result-icon,
+    .result-icon::after, .result-icon .draw, .result-icon .draw-2,
+    .details-list li, .error-list li, .confetti span {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        stroke-dashoffset: 0 !important;
+    }
+    .result-card::before { transform: scaleX(1) !important; }
+    .confetti { display: none; }
+}

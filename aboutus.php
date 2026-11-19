@@ -16,7 +16,7 @@ $year = date("Y");
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=20">
+    <link rel="stylesheet" href="styles.css?v=21">
 </head>
 <body>
 
@@ -31,7 +31,7 @@ $year = date("Y");
                     <li><a href="index.php#home">Home</a></li>
                     <li><a href="index.php#services">Services</a></li>
                     <li><a href="aboutus.php" class="active">About</a></li>
-                    <li><a href="index.php#contact" class="nav-contact-btn">Contact</a></li>
+                    <li><a href="appointment.php" class="nav-contact-btn">Book Appointment</a></li>
                 </ul>
                 
                 <div class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Theme">
@@ -137,7 +137,7 @@ $year = date("Y");
                     <h3>Get in Touch <span class="toggle-icon">+</span></h3>
                     <div class="footer-content">
                         <p>Have questions or ready to get started? Reach out to us. Your perfect smile is just a call away.</p>
-                        <a href="inquiry.php" class="inquiry-btn">Submit an Inquiry &rarr;</a>
+                        <a href="appointment.php" class="inquiry-btn">Book an Appointment &rarr;</a>
                     </div>
                 </div>
                 
@@ -184,7 +184,7 @@ $year = date("Y");
             </div>
         </div>
     </footer>
-    <script src="index.js?v=20"></script>
+    <script src="index.js?v=21"></script>
 
 </body>
 </html>
