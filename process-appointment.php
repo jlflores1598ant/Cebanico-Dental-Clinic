@@ -2,6 +2,9 @@
 date_default_timezone_set("Asia/Manila");
 require_once "db_connect.php";
 
+// Make.com Custom Webhook URL
+$webhookUrl = "https://hook.us2.make.com/ch21y91yn7oblt5jo2d2y09qulq4bn46";
+
 // Only accept POST form submissions
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: appointment.php");
@@ -84,10 +87,12 @@ if (!$dateObj) {
     }
 }
 
-// ---------- 3. Save to BOTH tables ----------
-$success       = false;
-$appointmentId = 0;
-$dayOfWeek     = "";
+// ---------- 3. Save to BOTH tables (including verification_code) ----------
+$success          = false;
+$requestId        = 0;
+$appointmentId    = 0;
+$dayOfWeek        = "";
+$verificationCode = (string)random_int(100000, 999999);
 
 if (empty($errors)) {
     $dayOfWeek = $dateObj->format("l");
@@ -112,14 +117,14 @@ if (empty($errors)) {
 
             $stmt2 = $conn->prepare(
                 "INSERT INTO appointments
-                    (request_id, appointment_date, day_of_week, service, status)
-                 VALUES (?, ?, ?, ?, 'Pending')"
+                    (request_id, appointment_date, day_of_week, service, status, verification_code, is_verified)
+                 VALUES (?, ?, ?, ?, 'Pending', ?, 0)"
             );
 
             if (!$stmt2) {
                 $errors[] = "Database prepare error (appointments): " . $conn->error;
             } else {
-                $stmt2->bind_param("isss", $requestId, $apptDate, $dayOfWeek, $service);
+                $stmt2->bind_param("issss", $requestId, $apptDate, $dayOfWeek, $service, $verificationCode);
 
                 if (!$stmt2->execute()) {
                     $errors[] = "Could not schedule appointment: " . $stmt2->error;
@@ -140,6 +145,39 @@ if (isset($conn) && $conn instanceof mysqli) {
 // Display helpers
 $prettyDate = ($success && $dateObj instanceof DateTime) ? $dateObj->format("l, F j, Y") : "";
 $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PAD_LEFT) : "";
+
+// ---------- 4. Trigger Outbound Make.com Webhook on Success ----------
+if ($success && !empty($webhookUrl)) {
+    $payload = [
+        "reference_number"  => $refNumber,
+        "request_id"        => $requestId,
+        "appointment_id"    => $appointmentId,
+        "full_name"         => $fullName,
+        "email"             => $email,
+        "contact_number"    => $contact,
+        "service"           => $service,
+        "appointment_date"  => $apptDate,
+        "pretty_date"       => $prettyDate,
+        "day_of_week"       => $dayOfWeek,
+        "verification_code" => $verificationCode
+    ];
+
+    $ch = curl_init($webhookUrl);
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($payload),
+        CURLOPT_HTTPHEADER     => [
+            "Content-Type: application/json",
+            "Accept: application/json"
+        ],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_SSL_VERIFYPEER => true
+    ]);
+
+    curl_exec($ch);
+    curl_close($ch);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -159,8 +197,8 @@ $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PA
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=25">
-    <link rel="stylesheet" href="appointment.css?v=25">
+    <link rel="stylesheet" href="styles.css?v=32">
+    <link rel="stylesheet" href="appointment.css?v=32">
     <link rel="stylesheet" href="process-appointment.css?v=2">
 </head>
 <body>
@@ -223,7 +261,7 @@ $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PA
                 </h1>
 
                 <p class="result-sub fade-up delay-3">
-                    We have received your appointment request. We will confirm your slot by call or email.
+                    We sent a 6-digit verification code to <strong><?php echo htmlspecialchars($email); ?></strong>. Enter it on the verification page to confirm your request.
                 </p>
 
                 <ul class="details-list">
@@ -241,13 +279,13 @@ $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PA
                     </li>
                     <li>
                         <span class="label">Status</span>
-                        <span class="value pending">Pending confirmation</span>
+                        <span class="value pending">Awaiting email verification</span>
                     </li>
                 </ul>
 
                 <div class="result-actions fade-up delay-6">
-                    <a href="index.php" class="btn btn-primary">Back to Home</a>
-                    <a href="appointment.php" class="btn btn-secondary">Book Another</a>
+                    <a href="verify-code.php?ref=<?php echo urlencode($refNumber); ?>" class="btn btn-primary">Verify Code Now</a>
+                    <a href="index.php" class="btn btn-secondary">Back to Home</a>
                 </div>
             </div>
 
@@ -288,6 +326,7 @@ $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PA
         </div>
     </main>
 
-    <script src="index.js?v=25"></script>
+    <script src="index.js?v=32"></script>
+    
 </body>
 </html>

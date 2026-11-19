@@ -1,5 +1,13 @@
 <?php
+session_start();
 date_default_timezone_set("Asia/Manila");
+
+// Check if redirected back after successful verification
+$verificationPopup = null;
+if (isset($_SESSION["verification_complete"]) && is_array($_SESSION["verification_complete"])) {
+    $verificationPopup = $_SESSION["verification_complete"];
+    unset($_SESSION["verification_complete"]);
+}
 
 // Define our services array for the dropdown options
 $services = [
@@ -34,8 +42,8 @@ $services = [
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=31">
-    <link rel="stylesheet" href="appointment.css?v=31">
+    <link rel="stylesheet" href="styles.css?v=32">
+    <link rel="stylesheet" href="appointment.css?v=32">
 </head>
 <body>
 
@@ -76,6 +84,44 @@ $services = [
         </div>
         <button type="button" id="closeRestrictionPopup" class="restriction-popup-close" aria-label="Close message">&times;</button>
     </div>
+
+    <?php if ($verificationPopup !== null) { ?>
+    <!-- Verification Complete Pop-Up Modal -->
+    <div id="verificationCompleteModal" class="verification-modal-backdrop show" role="dialog" aria-modal="true" aria-labelledby="verifyCompleteHeading">
+        <div class="verification-modal-card">
+            <button type="button" id="closeVerificationModalX" class="verification-modal-close" aria-label="Close pop-up">&times;</button>
+
+            <div class="verification-modal-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <span class="verification-modal-badge">Email Verified</span>
+            <h2 id="verifyCompleteHeading">Verification Complete!</h2>
+            <p class="verification-modal-sub">
+                Thank you, <strong><?php echo htmlspecialchars($verificationPopup["full_name"] ?? "Patient"); ?></strong>! Your appointment request has been verified.
+            </p>
+
+            <ul class="verification-modal-details">
+                <li>
+                    <span>Reference No.</span>
+                    <strong class="ref-code"><?php echo htmlspecialchars($verificationPopup["ref"] ?? ""); ?></strong>
+                </li>
+                <li>
+                    <span>Service</span>
+                    <strong><?php echo htmlspecialchars($verificationPopup["service"] ?? ""); ?></strong>
+                </li>
+                <li>
+                    <span>Date</span>
+                    <strong><?php echo htmlspecialchars($verificationPopup["date"] ?? ""); ?></strong>
+                </li>
+            </ul>
+
+            <button type="button" id="closeVerificationModalBtn" class="btn btn-primary verification-modal-btn">Done</button>
+        </div>
+    </div>
+    <?php } ?>
 
     <main class="appointment-hero">
         <div class="slide-overlay-gradient"></div>
@@ -180,6 +226,10 @@ $services = [
 
                     <button type="submit" class="btn btn-primary appointment-submit-btn">Request appointment</button>
 
+                    <div class="verify-code-divider"><span>Already have a booking code?</span></div>
+
+                    <a href="verify-code.php" class="btn btn-secondary verify-code-btn">Verify Code</a>
+
                 </form>
             </div>
 
@@ -251,7 +301,35 @@ $services = [
         </svg>
     </button>
 
-    <script src="index.js?v=31"></script>
-    <script src="appointment.js?v=31"></script>
+    <script src="index.js?v=32"></script>
+    <script src="appointment.js?v=32"></script>
+    <script>
+        (function () {
+            const modal = document.getElementById('verificationCompleteModal');
+            if (!modal) return;
+
+            const closeBtn = document.getElementById('closeVerificationModalBtn');
+            const closeX   = document.getElementById('closeVerificationModalX');
+
+            function closeVerificationPopup() {
+                modal.classList.remove('show');
+                if (window.history && window.history.replaceState) {
+                    const cleanUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, cleanUrl);
+                }
+            }
+
+            if (closeBtn) closeBtn.addEventListener('click', closeVerificationPopup);
+            if (closeX) closeX.addEventListener('click', closeVerificationPopup);
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) closeVerificationPopup();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal.classList.contains('show')) {
+                    closeVerificationPopup();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
