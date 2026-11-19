@@ -17,6 +17,7 @@ $email    = trim($_POST["email"]           ?? "");
 $contact  = trim($_POST["contactNumber"]   ?? "");
 $service  = trim($_POST["service"]         ?? "");
 $apptDate = trim($_POST["appointmentDate"] ?? "");
+$apptTime = trim($_POST["appointmentTime"] ?? "");
 $consent  = isset($_POST["consent"]) ? 1 : 0;
 
 // ---------- 2. Server-side validation ----------
@@ -34,6 +35,17 @@ $allowedServices = [
     "EMAX Crown",
     "Root Canal Treatment",
     "Fixed Bridge - Tooth Preparation"
+];
+
+$allowedTimeSlots = [
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "1:00 PM",
+    "2:00 PM",
+    "3:00 PM",
+    "4:00 PM",
+    "5:00 PM"
 ];
 
 if ($fullName === "") {
@@ -54,6 +66,10 @@ if (!preg_match("/^09[0-9]{9}$/", $contact)) {
 
 if (!in_array($service, $allowedServices, true)) {
     $errors[] = "Please select a valid service.";
+}
+
+if (!in_array($apptTime, $allowedTimeSlots, true)) {
+    $errors[] = "Please select a valid preferred time slot.";
 }
 
 if ($consent !== 1) {
@@ -87,7 +103,7 @@ if (!$dateObj) {
     }
 }
 
-// ---------- 3. Save to BOTH tables (including verification_code) ----------
+// ---------- 3. Save to BOTH tables (including full_name in appointments) ----------
 $success          = false;
 $requestId        = 0;
 $appointmentId    = 0;
@@ -99,14 +115,14 @@ if (empty($errors)) {
 
     $stmt1 = $conn->prepare(
         "INSERT INTO appointment_requests
-            (full_name, email, contact_number, service, appointment_date, consent)
-         VALUES (?, ?, ?, ?, ?, ?)"
+            (full_name, email, contact_number, service, appointment_date, appointment_time, consent)
+         VALUES (?, ?, ?, ?, ?, ?, ?)"
     );
 
     if (!$stmt1) {
         $errors[] = "Database prepare error (requests): " . $conn->error;
     } else {
-        $stmt1->bind_param("sssssi", $fullName, $email, $contact, $service, $apptDate, $consent);
+        $stmt1->bind_param("ssssssi", $fullName, $email, $contact, $service, $apptDate, $apptTime, $consent);
 
         if (!$stmt1->execute()) {
             $errors[] = "Could not save your request: " . $stmt1->error;
@@ -117,14 +133,14 @@ if (empty($errors)) {
 
             $stmt2 = $conn->prepare(
                 "INSERT INTO appointments
-                    (request_id, appointment_date, day_of_week, service, status, verification_code, is_verified)
-                 VALUES (?, ?, ?, ?, 'Pending', ?, 0)"
+                    (request_id, full_name, appointment_date, appointment_time, day_of_week, service, status, verification_code, is_verified)
+                 VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, 0)"
             );
 
             if (!$stmt2) {
                 $errors[] = "Database prepare error (appointments): " . $conn->error;
             } else {
-                $stmt2->bind_param("issss", $requestId, $apptDate, $dayOfWeek, $service, $verificationCode);
+                $stmt2->bind_param("issssss", $requestId, $fullName, $apptDate, $apptTime, $dayOfWeek, $service, $verificationCode);
 
                 if (!$stmt2->execute()) {
                     $errors[] = "Could not schedule appointment: " . $stmt2->error;
@@ -149,6 +165,7 @@ $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PA
 // ---------- 4. Trigger Outbound Make.com Webhook on Success ----------
 if ($success && !empty($webhookUrl)) {
     $payload = [
+        "event_type"        => "appointment_created",
         "reference_number"  => $refNumber,
         "request_id"        => $requestId,
         "appointment_id"    => $appointmentId,
@@ -157,6 +174,7 @@ if ($success && !empty($webhookUrl)) {
         "contact_number"    => $contact,
         "service"           => $service,
         "appointment_date"  => $apptDate,
+        "appointment_time"  => $apptTime,
         "pretty_date"       => $prettyDate,
         "day_of_week"       => $dayOfWeek,
         "verification_code" => $verificationCode
@@ -197,8 +215,8 @@ if ($success && !empty($webhookUrl)) {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=32">
-    <link rel="stylesheet" href="appointment.css?v=32">
+    <link rel="stylesheet" href="styles.css?v=35">
+    <link rel="stylesheet" href="appointment.css?v=34">
     <link rel="stylesheet" href="process-appointment.css?v=2">
 </head>
 <body>
@@ -240,7 +258,6 @@ if ($success && !empty($webhookUrl)) {
 
         <?php if ($success) { ?>
 
-            <!-- ================= SUCCESS ================= -->
             <div class="result-card is-success">
 
                 <div class="confetti" aria-hidden="true">
@@ -278,6 +295,10 @@ if ($success && !empty($webhookUrl)) {
                         <span class="value"><?php echo htmlspecialchars($prettyDate); ?></span>
                     </li>
                     <li>
+                        <span class="label">Preferred Time</span>
+                        <span class="value"><?php echo htmlspecialchars($apptTime); ?></span>
+                    </li>
+                    <li>
                         <span class="label">Status</span>
                         <span class="value pending">Awaiting email verification</span>
                     </li>
@@ -291,7 +312,6 @@ if ($success && !empty($webhookUrl)) {
 
         <?php } else { ?>
 
-            <!-- ================= ERROR ================= -->
             <div class="result-card is-error">
 
                 <div class="result-icon error">
@@ -326,7 +346,6 @@ if ($success && !empty($webhookUrl)) {
         </div>
     </main>
 
-    <script src="index.js?v=32"></script>
-    
+    <script src="index.js?v=35"></script>
 </body>
 </html>
