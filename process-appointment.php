@@ -1,7 +1,8 @@
 <?php
+date_default_timezone_set("Asia/Manila");
 require_once "db_connect.php";
 
-// Only accept form submissions
+// Only accept POST form submissions
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: appointment.php");
     exit;
@@ -32,36 +33,58 @@ $allowedServices = [
     "Fixed Bridge - Tooth Preparation"
 ];
 
-if ($fullName === "" || !preg_match("/^[A-Za-z\s]+$/", $fullName)) {
+if ($fullName === "") {
+    $errors[] = "Please enter your full name.";
+} elseif (!preg_match("/^[A-Za-z\s]+$/", $fullName)) {
     $errors[] = "Please enter a valid full name (letters and spaces only).";
 }
+
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = "Please enter a valid email address.";
 }
-if (!preg_match("/^[0-9]{7,15}$/", $contact)) {
-    $errors[] = "Please enter a valid contact number (numbers only).";
+
+// Strictly require 11-digit domestic Philippine mobile number starting with 09
+$contact = preg_replace("/[^0-9]/", "", $contact);
+if (!preg_match("/^09[0-9]{9}$/", $contact)) {
+    $errors[] = "Please enter a valid 11-digit Philippine mobile number starting with 09 (e.g., 09171234567).";
 }
+
 if (!in_array($service, $allowedServices, true)) {
     $errors[] = "Please select a valid service.";
 }
+
 if ($consent !== 1) {
     $errors[] = "You must agree to the consent statement.";
 }
 
 $dateObj = DateTime::createFromFormat("Y-m-d", $apptDate);
-if (!$dateObj || $dateObj->format("Y-m-d") !== $apptDate) {
+if (!$dateObj) {
+    $errors[] = "Please choose a valid appointment date.";
+} elseif ($dateObj->format("Y-m-d") !== $apptDate) {
     $errors[] = "Please choose a valid appointment date.";
 } else {
-    if ($dateObj < new DateTime("today")) {
+    $dateObj->setTime(0, 0, 0);
+
+    $todayObj = new DateTime("today");
+    $todayObj->setTime(0, 0, 0);
+
+    $maxAllowedYear = (int)date("Y") + 1;
+    $maxDateObj = DateTime::createFromFormat("Y-m-d", $maxAllowedYear . "-12-31");
+    $maxDateObj->setTime(0, 0, 0);
+
+    if ($dateObj < $todayObj) {
         $errors[] = "Appointment date cannot be in the past.";
     }
+    if ($dateObj > $maxDateObj) {
+        $errors[] = "Appointments can only be booked up to December 31, " . $maxAllowedYear . ".";
+    }
     // Clinic is closed on Thursdays (N = 4)
-    if ($dateObj->format("N") == 4) {
+    if ((int)$dateObj->format("N") === 4) {
         $errors[] = "The clinic is closed on Thursdays. Please choose another day.";
     }
 }
 
-// ---------- 3. Save to BOTH tables (all-or-nothing) ----------
+// ---------- 3. Save to BOTH tables ----------
 $success       = false;
 $appointmentId = 0;
 $dayOfWeek     = "";
@@ -69,45 +92,53 @@ $dayOfWeek     = "";
 if (empty($errors)) {
     $dayOfWeek = $dateObj->format("l");
 
-    try {
-        $conn->begin_transaction();
+    $stmt1 = $conn->prepare(
+        "INSERT INTO appointment_requests
+            (full_name, email, contact_number, service, appointment_date, consent)
+         VALUES (?, ?, ?, ?, ?, ?)"
+    );
 
-        // TABLE 1: everything the user typed in
-        $stmt1 = $conn->prepare(
-            "INSERT INTO appointment_requests
-                (full_name, email, contact_number, service, appointment_date, consent)
-             VALUES (?, ?, ?, ?, ?, ?)"
-        );
+    if (!$stmt1) {
+        $errors[] = "Database prepare error (requests): " . $conn->error;
+    } else {
         $stmt1->bind_param("sssssi", $fullName, $email, $contact, $service, $apptDate, $consent);
-        $stmt1->execute();
-        $requestId = $conn->insert_id;
-        $stmt1->close();
 
-        // TABLE 2: arranged per appointment, linked using request_id
-        $stmt2 = $conn->prepare(
-            "INSERT INTO appointments
-                (request_id, appointment_date, day_of_week, service, status)
-             VALUES (?, ?, ?, ?, 'Pending')"
-        );
-        $stmt2->bind_param("isss", $requestId, $apptDate, $dayOfWeek, $service);
-        $stmt2->execute();
-        $appointmentId = $conn->insert_id;
-        $stmt2->close();
+        if (!$stmt1->execute()) {
+            $errors[] = "Could not save your request: " . $stmt1->error;
+            $stmt1->close();
+        } else {
+            $requestId = $conn->insert_id;
+            $stmt1->close();
 
-        $conn->commit();
-        $success = true;
+            $stmt2 = $conn->prepare(
+                "INSERT INTO appointments
+                    (request_id, appointment_date, day_of_week, service, status)
+                 VALUES (?, ?, ?, ?, 'Pending')"
+            );
 
-    } catch (mysqli_sql_exception $e) {
-        $conn->rollback();
-        error_log("Appointment save failed: " . $e->getMessage());
-        $errors[] = "Something went wrong while saving your request. Please try again.";
+            if (!$stmt2) {
+                $errors[] = "Database prepare error (appointments): " . $conn->error;
+            } else {
+                $stmt2->bind_param("isss", $requestId, $apptDate, $dayOfWeek, $service);
+
+                if (!$stmt2->execute()) {
+                    $errors[] = "Could not schedule appointment: " . $stmt2->error;
+                } else {
+                    $appointmentId = $conn->insert_id;
+                    $success = true;
+                }
+                $stmt2->close();
+            }
+        }
     }
 }
 
-$conn->close();
+if (isset($conn) && $conn instanceof mysqli) {
+    $conn->close();
+}
 
 // Display helpers
-$prettyDate = $success ? $dateObj->format("l, F j, Y") : "";
+$prettyDate = ($success && $dateObj instanceof DateTime) ? $dateObj->format("l, F j, Y") : "";
 $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PAD_LEFT) : "";
 ?>
 <!DOCTYPE html>
@@ -124,14 +155,13 @@ $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PA
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <script>
-        // Prevent flash of wrong theme
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=21">
-    <link rel="stylesheet" href="appointment.css?v=21">
-    <link rel="stylesheet" href="process-appointment.css?v=1">
+    <link rel="stylesheet" href="styles.css?v=25">
+    <link rel="stylesheet" href="appointment.css?v=25">
+    <link rel="stylesheet" href="process-appointment.css?v=2">
 </head>
 <body>
 
@@ -258,6 +288,6 @@ $refNumber  = $success ? "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PA
         </div>
     </main>
 
-    <script src="index.js?v=21"></script>
+    <script src="index.js?v=25"></script>
 </body>
 </html>
