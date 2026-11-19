@@ -3,73 +3,171 @@ session_start();
 date_default_timezone_set("Asia/Manila");
 require_once "db_connect.php";
 
-$refInput  = strtoupper(trim($_GET["ref"] ?? $_POST["referenceNumber"] ?? ""));
-$codeInput = trim($_POST["verificationCode"] ?? "");
-$errorMsg  = "";
+// Hook for booking appointment verification
+$webhookUrl = "https://hook.us2.make.com/ch21y91yn7oblt5jo2d2y09qulq4bn46";
+
+function tableHasColumn(mysqli $conn, string $table, string $column): bool
+{
+    $safeTable  = preg_replace("/[^a-zA-Z0-9_]/", "", $table);
+    $safeColumn = $conn->real_escape_string($column);
+    $res = $conn->query("SHOW COLUMNS FROM `{$safeTable}` LIKE '{$safeColumn}'");
+    if ($res instanceof mysqli_result) {
+        $exists = $res->num_rows > 0;
+        $res->free();
+        return $exists;
+    }
+    return false;
+}
+
+function sendVerificationCompleteWebhook(string $webhookUrl, array $payload): void
+{
+    if (empty($webhookUrl)) {
+        return;
+    }
+
+    $ch = curl_init($webhookUrl);
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($payload),
+        CURLOPT_HTTPHEADER     => [
+            "Content-Type: application/json",
+            "Accept: application/json"
+        ],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 8,
+        CURLOPT_SSL_VERIFYPEER => true
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+}
+
+$hasApptTime = tableHasColumn($conn, "appointments", "appointment_time");
+$timeSelect  = $hasApptTime ? ", a.appointment_time" : ", '' AS appointment_time";
+
+$refInput  = strtoupper(trim($_GET["ref"] ?? $_POST["reference_number"] ?? ""));
+$codeInput = trim($_POST["verification_code"] ?? "");
+$justSent  = isset($_GET["sent"]) && $_GET["sent"] === "1";
+$errors    = [];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Extract numeric appointment_id from CDC-0001 (also accepts plain digits)
-    if (!preg_match("/^(?:CDC-)?(\d+)$/i", $refInput, $matches)) {
-        $errorMsg = "Please enter a valid Reference No. (e.g., CDC-0001).";
-    } elseif (!preg_match("/^\d{6}$/", $codeInput)) {
-        $errorMsg = "Please enter the 6-digit verification code sent to your email.";
-    } else {
-        $appointmentId = (int)$matches[1];
-        $formattedRef  = "CDC-" . str_pad((string)$appointmentId, 4, "0", STR_PAD_LEFT);
-        $refInput      = $formattedRef;
+    $numericId = (int)preg_replace("/[^0-9]/", "", $refInput);
 
-        $stmt = $conn->prepare(
-            "SELECT a.appointment_id, a.appointment_date, a.service, a.status,
-                    a.verification_code, a.is_verified, r.full_name
-             FROM appointments a
-             INNER JOIN appointment_requests r ON a.request_id = r.request_id
-             WHERE a.appointment_id = ?
-             LIMIT 1"
-        );
+    if (!preg_match("/^\d{6}$/", $codeInput)) {
+        $errors[] = "Please enter the 6-digit verification code sent to your email.";
+    }
 
-        if ($stmt) {
-            $stmt->bind_param("i", $appointmentId);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row    = $result->fetch_assoc();
-            $stmt->close();
-
-            if (!$row) {
-                $errorMsg = "No appointment found for Reference No. " . htmlspecialchars($formattedRef) . ".";
-            } elseif (!empty($row["verification_code"]) && hash_equals((string)$row["verification_code"], $codeInput)) {
-                // Mark appointment as verified in MySQL
-                if ((int)$row["is_verified"] === 0) {
-                    $upd = $conn->prepare("UPDATE appointments SET is_verified = 1 WHERE appointment_id = ?");
-                    if ($upd) {
-                        $upd->bind_param("i", $appointmentId);
-                        $upd->execute();
-                        $upd->close();
-                    }
-                }
-
-                $d = DateTime::createFromFormat("Y-m-d", $row["appointment_date"]);
-                $prettyDate = $d ? $d->format("l, F j, Y") : $row["appointment_date"];
-
-                // Store verified details for the pop-up on appointment.php
-                $_SESSION["verification_complete"] = [
-                    "ref"       => $formattedRef,
-                    "full_name" => $row["full_name"],
-                    "service"   => $row["service"],
-                    "date"      => $prettyDate
-                ];
-
-                if (isset($conn) && $conn instanceof mysqli) {
-                    $conn->close();
-                }
-
-                // Redirect back to appointment.php to show the Verification Complete pop-up
-                header("Location: appointment.php?verified=1");
-                exit;
-            } else {
-                $errorMsg = "The verification code does not match Reference No. " . htmlspecialchars($formattedRef) . ".";
+    if (empty($errors)) {
+        if ($numericId > 0) {
+            $stmt = $conn->prepare(
+                "SELECT a.appointment_id, a.request_id, a.appointment_date, a.day_of_week,
+                        a.service, a.verification_code, a.is_verified, a.status
+                        {$timeSelect},
+                        r.full_name, r.email, r.contact_number
+                 FROM appointments a
+                 INNER JOIN appointment_requests r ON a.request_id = r.request_id
+                 WHERE a.appointment_id = ?
+                 LIMIT 1"
+            );
+            if ($stmt) {
+                $stmt->bind_param("i", $numericId);
             }
         } else {
-            $errorMsg = "Database error: " . $conn->error;
+            $stmt = $conn->prepare(
+                "SELECT a.appointment_id, a.request_id, a.appointment_date, a.day_of_week,
+                        a.service, a.verification_code, a.is_verified, a.status
+                        {$timeSelect},
+                        r.full_name, r.email, r.contact_number
+                 FROM appointments a
+                 INNER JOIN appointment_requests r ON a.request_id = r.request_id
+                 WHERE a.verification_code = ? AND a.status <> 'Cancelled'
+                 ORDER BY a.appointment_id DESC
+                 LIMIT 1"
+            );
+            if ($stmt) {
+                $stmt->bind_param("s", $codeInput);
+            }
+        }
+
+        if (!$stmt) {
+            $errors[] = "Database error: " . $conn->error;
+        } else {
+            $stmt->execute();
+            $res  = $stmt->get_result();
+            $appt = $res->fetch_assoc();
+            $stmt->close();
+
+            if (!$appt) {
+                $errors[] = $numericId > 0
+                    ? "No appointment found with reference number " . htmlspecialchars($refInput) . "."
+                    : "No appointment found matching that 6-digit verification code.";
+            } elseif ((string)$appt["status"] === "Cancelled") {
+                $errors[] = "This appointment has already been cancelled.";
+            } elseif (!hash_equals((string)$appt["verification_code"], $codeInput)) {
+                $errors[] = "Incorrect verification code. Please check your email and try again.";
+            } else {
+                $verifiedApptId = (int)$appt["appointment_id"];
+
+                $upd = $conn->prepare(
+                    "UPDATE appointments
+                     SET is_verified = 1
+                     WHERE appointment_id = ?"
+                );
+                $upd->bind_param("i", $verifiedApptId);
+                $upd->execute();
+                $upd->close();
+
+                $refFormatted = "CDC-" . str_pad((string)$verifiedApptId, 4, "0", STR_PAD_LEFT);
+                $dateObj      = DateTime::createFromFormat("Y-m-d", $appt["appointment_date"]);
+                $prettyDate   = $dateObj ? $dateObj->format("F j, Y") : $appt["appointment_date"];
+                $apptTime     = trim((string)($appt["appointment_time"] ?? ""));
+
+                sendVerificationCompleteWebhook($webhookUrl, [
+                    "event_type"        => "appointment_verified",
+                    "clinic_name"       => "Cebanico Dental Clinic",
+                    "reference_number"  => $refFormatted,
+                    "appointment_id"    => $verifiedApptId,
+                    "request_id"        => (int)$appt["request_id"],
+                    "full_name"         => $appt["full_name"],
+                    "email"             => $appt["email"],
+                    "to_email"          => $appt["email"],
+                    "contact_number"    => $appt["contact_number"],
+                    "service"           => $appt["service"],
+                    "appointment_date"  => $appt["appointment_date"],
+                    "appointment_time"  => $apptTime,
+                    "pretty_date"       => $prettyDate,
+                    "day_of_week"       => $appt["day_of_week"],
+                    "verification_code" => $codeInput,
+                    "is_verified"       => 1,
+                    "status"            => $appt["status"]
+                ]);
+
+                if (!isset($_SESSION["patient"]) || !is_array($_SESSION["patient"]) || empty($_SESSION["patient"]["email"])) {
+                    $_SESSION["patient"] = [
+                        "username"       => $appt["full_name"],
+                        "email"          => strtolower(trim((string)$appt["email"])),
+                        "contact_number" => $appt["contact_number"],
+                        "verified_at"    => time()
+                    ];
+                }
+
+                $_SESSION["verified_booking"] = [
+                    "ref"              => $refFormatted,
+                    "appointment_id"   => $verifiedApptId,
+                    "full_name"        => $appt["full_name"],
+                    "email"            => $appt["email"],
+                    "contact_number"   => $appt["contact_number"],
+                    "service"          => $appt["service"],
+                    "appointment_date" => $appt["appointment_date"],
+                    "pretty_date"      => $prettyDate,
+                    "appointment_time" => $apptTime,
+                    "day_of_week"      => $appt["day_of_week"],
+                    "status"           => $appt["status"]
+                ];
+
+                $conn->close();
+                header("Location: booking-verified.php?ref=" . urlencode($refFormatted));
+                exit;
+            }
         }
     }
 }
@@ -83,7 +181,7 @@ if (isset($conn) && $conn instanceof mysqli) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Code | Cebanico Dental Clinic</title>
+    <title>Verify Booking Code | Cebanico Dental Clinic</title>
 
     <link rel="icon" type="image/png" href="Images/Faviconlogo.png">
 
@@ -96,8 +194,8 @@ if (isset($conn) && $conn instanceof mysqli) {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=32">
-    <link rel="stylesheet" href="appointment.css?v=32">
+    <link rel="stylesheet" href="styles.css?v=39">
+    <link rel="stylesheet" href="appointment.css?v=39">
 </head>
 <body>
 
@@ -114,6 +212,13 @@ if (isset($conn) && $conn instanceof mysqli) {
                     <li><a href="aboutus.php">About</a></li>
                     <li><a href="appointment.php" class="nav-contact-btn active">Book Appointment</a></li>
                 </ul>
+
+                <a href="profile.php" class="nav-profile-btn" aria-label="My Profile" title="My Profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </a>
 
                 <div class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Theme">
                     <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -135,61 +240,66 @@ if (isset($conn) && $conn instanceof mysqli) {
 
         <div class="appointment-layout container">
 
-            <!-- Left Info Content -->
             <div class="appointment-info">
-                <span class="eyebrow-text">Email Verification</span>
+                <span class="eyebrow-text">Booking Verification</span>
                 <h1>Verify your <span class="hero-highlight">booking</span></h1>
-                <p>Enter the Reference No. and 6-digit verification code sent to your email address to confirm your appointment request.</p>
+                <p>Enter your booking reference number and the 6-digit verification code sent to your email address.</p>
 
                 <div class="appointment-hours-note">
-                    <p><strong>Where to find your code:</strong> Check your inbox (and spam folder) for an email from Cebanico Dental Clinic.</p>
-                    <p><strong>Need a new booking?</strong> Return to the appointment form to schedule a visit.</p>
+                    <p><strong>Reference Format:</strong> Example <code>CDC-0001</code></p>
+                    <p><strong>Need to reschedule?</strong> You can view, update, or cancel your bookings anytime under <strong>My Appointments</strong>.</p>
                 </div>
             </div>
 
-            <!-- Right Verification Form -->
             <div class="appointment-form-wrapper">
-                <form class="appointment-form glass-card" action="verify-code.php" method="POST">
+                <form class="appointment-form glass-card" action="verify-code.php" method="POST" autocomplete="off" novalidate>
 
-                    <?php if ($errorMsg !== "") { ?>
+                    <?php if ($justSent && empty($errors)) { ?>
+                        <div class="otp-notice-banner" role="status">
+                            Your appointment request was submitted! Check your email for your 6-digit verification code.
+                        </div>
+                    <?php } ?>
+
+                    <?php if (!empty($errors)) { ?>
                         <div class="verify-error-banner" role="alert">
-                            <?php echo htmlspecialchars($errorMsg); ?>
+                            <?php foreach ($errors as $err) { ?>
+                                <div><?php echo htmlspecialchars($err); ?></div>
+                            <?php } ?>
                         </div>
                     <?php } ?>
 
                     <div class="form-group">
-                        <label for="referenceNumber">Reference No.</label>
+                        <label for="reference_number">Booking Reference Number</label>
                         <input
                             type="text"
-                            id="referenceNumber"
-                            name="referenceNumber"
+                            id="reference_number"
+                            name="reference_number"
                             placeholder="CDC-0001"
                             value="<?php echo htmlspecialchars($refInput); ?>"
-                            autocomplete="off"
-                            required
                         >
                     </div>
 
                     <div class="form-group">
-                        <label for="verificationCode">6-Digit Verification Code</label>
+                        <label for="verification_code">6-Digit Verification Code</label>
                         <input
                             type="text"
-                            id="verificationCode"
-                            name="verificationCode"
-                            placeholder="482910"
+                            id="verification_code"
+                            name="verification_code"
+                            placeholder="123456"
                             maxlength="6"
-                            pattern="\d{6}"
                             inputmode="numeric"
-                            autocomplete="one-time-code"
                             required
                         >
                     </div>
 
-                    <button type="submit" class="btn btn-primary appointment-submit-btn">Verify Code</button>
+                    <button type="submit" class="btn btn-primary appointment-submit-btn">Confirm Verification &rarr;</button>
 
-                    <div class="verify-code-divider"><span>or</span></div>
+                    <div class="verify-code-divider"><span>Quick navigation</span></div>
 
-                    <a href="appointment.php" class="btn btn-secondary verify-code-btn">Back to Appointment Page</a>
+                    <div class="booking-secondary-actions">
+                        <a href="my-appointments.php" class="btn btn-secondary verify-code-btn">View My Appointments</a>
+                        <a href="appointment.php" class="btn btn-secondary verify-code-btn">Back to Booking</a>
+                    </div>
 
                 </form>
             </div>
@@ -197,16 +307,67 @@ if (isset($conn) && $conn instanceof mysqli) {
         </div>
     </main>
 
-    <button id="backToTopBtn" aria-label="Back to Top" onclick="scrollToTop()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 15l-6-6-6 6"/>
-        </svg>
-    </button>
+    <footer id="contact">
+        <div class="container reveal">
+            <div class="footer-top">
+                <div class="footer-col">
+                    <h3>Get in Touch</h3>
+                    <div class="footer-content">
+                        <p>Have questions or ready to get started? Reach out to us. Your perfect smile is just a call away.</p>
+                        <a href="appointment.php" style="color: var(--primary, #0ea5e9); font-weight: 600; display: inline-block; margin-top: 12px;">Book an Appointment &rarr;</a>
+                    </div>
+                </div>
 
-    <script src="index.js?v=32"></script>
+                <div class="footer-col">
+                    <h3>Visit Us</h3>
+                    <div class="footer-content">
+                        <a href="https://www.google.com/maps/search/?api=1&query=0176+Manila+E+Rd+Binangonan+Rizal" target="_blank" rel="noopener noreferrer" class="contact-item">
+                            <span>📍</span>
+                            <span>0176 Manila E Rd, Binangonan, Rizal</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h3>Contact</h3>
+                    <div class="footer-content">
+                        <div class="footer-contact-links">
+                            <a href="tel:+639563708675" class="contact-item">
+                                <span>📞</span>
+                                <span>0956 370 8675</span>
+                            </a>
+                            <a href="mailto:cebanicodentalclinic@gmail.com" class="contact-item">
+                                <span>✉️</span>
+                                <span>cebanicodentalclinic@gmail.com</span>
+                            </a>
+                            <a href="https://www.facebook.com/cebanicodental" target="_blank" rel="noopener noreferrer" class="contact-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h7v-7h-2v-3h2V9.5C12 7.57 13.57 6 15.5 6H18v3h-2c-.55 0-1 .45-1 1v1h3v3h-3v7h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
+                                </svg>
+                                <span>Cebanico Dental</span>
+                            </a>
+                            <a href="https://www.instagram.com/cebanicodental" target="_blank" rel="noopener noreferrer" class="contact-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                                </svg>
+                                <span>cebanicodental</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> Cebanico Dental Clinic. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="index.js?v=39"></script>
     <script>
-        // Keep verification code input strictly 6 numeric digits
-        const codeField = document.getElementById('verificationCode');
+        const codeField = document.getElementById('verification_code');
         if (codeField) {
             codeField.addEventListener('input', function () {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);

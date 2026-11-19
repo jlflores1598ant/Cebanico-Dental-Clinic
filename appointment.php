@@ -2,6 +2,14 @@
 session_start();
 date_default_timezone_set("Asia/Manila");
 
+// Require patient sign-in before accessing the booking form
+if (!isset($_SESSION["patient"]) || !is_array($_SESSION["patient"])) {
+    header("Location: signin.php");
+    exit;
+}
+
+$patientSession = $_SESSION["patient"];
+
 // Check if redirected back after successful verification
 $verificationPopup = null;
 if (isset($_SESSION["verification_complete"]) && is_array($_SESSION["verification_complete"])) {
@@ -42,8 +50,8 @@ $services = [
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=32">
-    <link rel="stylesheet" href="appointment.css?v=32">
+    <link rel="stylesheet" href="styles.css?v=37">
+    <link rel="stylesheet" href="appointment.css?v=37">
 </head>
 <body>
 
@@ -58,7 +66,7 @@ $services = [
                     <li><a href="index.php#home">Home</a></li>
                     <li><a href="index.php#services">Services</a></li>
                     <li><a href="aboutus.php">About</a></li>
-                    <li><a href="appointment.php" class="nav-contact-btn active">Book Appointment</a></li>
+                    <li><a href="signin.php" class="nav-contact-btn active">Book Appointment</a></li>
                 </ul>
                 
                 <div class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Theme">
@@ -136,9 +144,27 @@ $services = [
                 <p>Tell us what you need and when. We will confirm your slot by call or email.</p>
                 
                 <div class="appointment-hours-note">
+                    <p><strong>Signed in as:</strong> <?php echo htmlspecialchars($patientSession["username"] ?? ""); ?> (<?php echo htmlspecialchars($patientSession["email"] ?? ""); ?>) &mdash; <a href="signin.php" style="color: #38bdf8; text-decoration: underline;">Switch account</a></p>
                     <p><strong>Open Mon, Tue, Wed, Sat, Sun:</strong> 10AM – 6PM</p>
                     <p><strong>Friday:</strong> by appointment only</p>
                     <p><strong>Thursday:</strong> closed</p>
+                </div>
+
+                <div class="view-appointments-cta">
+                    <a href="my-appointments.php" class="btn btn-secondary view-my-appt-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                            <path d="M8 14h.01"></path>
+                            <path d="M12 14h.01"></path>
+                            <path d="M16 14h.01"></path>
+                            <path d="M8 18h.01"></path>
+                            <path d="M12 18h.01"></path>
+                        </svg>
+                        <span>View My Appointments</span>
+                    </a>
                 </div>
             </div>
 
@@ -148,17 +174,17 @@ $services = [
                     
                     <div class="form-group">
                         <label for="fullName">Full name</label>
-                        <input type="text" id="fullName" name="fullName" placeholder="Juan Dela Cruz" autocomplete="name" required>
+                        <input type="text" id="fullName" name="fullName" placeholder="Juan Dela Cruz" value="<?php echo htmlspecialchars($patientSession["username"] ?? ""); ?>" autocomplete="name" required>
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" placeholder="name@example.com" autocomplete="email" required>
+                        <input type="email" id="email" name="email" placeholder="name@example.com" value="<?php echo htmlspecialchars($patientSession["email"] ?? ""); ?>" autocomplete="email" required>
                     </div>
 
                     <div class="form-group">
                         <label for="contactNumber">Contact number</label>
-                        <input type="tel" id="contactNumber" name="contactNumber" placeholder="09171234567" inputmode="numeric" maxlength="11" autocomplete="tel" required>
+                        <input type="tel" id="contactNumber" name="contactNumber" placeholder="09171234567" value="<?php echo htmlspecialchars($patientSession["contact_number"] ?? ""); ?>" inputmode="numeric" maxlength="11" autocomplete="tel" required>
                     </div>
 
                     <div class="form-row">
@@ -226,9 +252,12 @@ $services = [
 
                     <button type="submit" class="btn btn-primary appointment-submit-btn">Request appointment</button>
 
-                    <div class="verify-code-divider"><span>Already have a booking code?</span></div>
+                    <div class="verify-code-divider"><span>Manage or verify your booking</span></div>
 
-                    <a href="verify-code.php" class="btn btn-secondary verify-code-btn">Verify Code</a>
+                    <div class="booking-secondary-actions">
+                        <a href="my-appointments.php" class="btn btn-secondary verify-code-btn">View My Appointments</a>
+                        <a href="verify-code.php" class="btn btn-secondary verify-code-btn">Verify Code</a>
+                    </div>
 
                 </form>
             </div>
@@ -244,7 +273,7 @@ $services = [
                     <h3>Get in Touch</h3>
                     <div class="footer-content">
                         <p>Have questions or ready to get started? Reach out to us. Your perfect smile is just a call away.</p>
-                        <a href="appointment.php" style="color: var(--primary, #0ea5e9); font-weight: 600; display: inline-block; margin-top: 12px;">Book an Appointment &rarr;</a>
+                        <a href="signin.php" style="color: var(--primary, #0ea5e9); font-weight: 600; display: inline-block; margin-top: 12px;">Book an Appointment &rarr;</a>
                     </div>
                 </div>
 
@@ -301,8 +330,8 @@ $services = [
         </svg>
     </button>
 
-    <script src="index.js?v=32"></script>
-    <script src="appointment.js?v=32"></script>
+    <script src="index.js?v=37"></script>
+    <script src="appointment.js?v=37"></script>
     <script>
         (function () {
             const modal = document.getElementById('verificationCompleteModal');
