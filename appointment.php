@@ -34,8 +34,8 @@ $services = [
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=27">
-    <link rel="stylesheet" href="appointment.css?v=27">
+    <link rel="stylesheet" href="styles.css?v=31">
+    <link rel="stylesheet" href="appointment.css?v=31">
 </head>
 <body>
 
@@ -120,7 +120,7 @@ $services = [
                             <label for="service">Type of service</label>
                             <select id="service" name="service" required>
                                 <option value="" disabled selected>Select a service</option>
-                                <?php foreach ($services as$srv) { ?>
+                                <?php foreach ($services as $srv) { ?>
                                     <option value="<?php echo htmlspecialchars($srv); ?>"><?php echo htmlspecialchars($srv); ?></option>
                                 <?php } ?>
                             </select>
@@ -128,33 +128,43 @@ $services = [
 
                         <div class="form-group half-width">
                             <label for="appointmentDateDisplay">Day of appointment</label>
-                            <div class="custom-date-wrapper" id="customDateWrapper">
-                                <input type="text" id="appointmentDateDisplay" placeholder="mm/dd/yyyy" readonly required>
+                            <div class="custom-date-picker" id="customDatePicker">
                                 <input type="hidden" id="appointmentDate" name="appointmentDate" required>
-                                <span class="calendar-trigger-icon" aria-hidden="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                </span>
+                                <button type="button" id="appointmentDateDisplay" class="date-display-btn" aria-haspopup="dialog" aria-expanded="false">
+                                    <span id="appointmentDateText" class="date-placeholder">Select date</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                </button>
 
-                                <div class="custom-calendar-popover" id="customCalendarPopover" role="dialog" aria-label="Choose appointment date">
+                                <div id="calendarPopover" class="calendar-popover" role="dialog" aria-label="Choose appointment date">
                                     <div class="calendar-header">
-                                        <button type="button" class="cal-nav-btn" id="calPrevMonth" aria-label="Previous month">&#10094;</button>
+                                        <button type="button" id="calPrevMonth" class="cal-nav-btn" aria-label="Previous month">&#10094;</button>
                                         <div class="cal-select-group">
                                             <select id="calMonthSelect" aria-label="Select month"></select>
                                             <select id="calYearSelect" aria-label="Select year"></select>
                                         </div>
-                                        <button type="button" class="cal-nav-btn" id="calNextMonth" aria-label="Next month">&#10095;</button>
+                                        <button type="button" id="calNextMonth" class="cal-nav-btn" aria-label="Next month">&#10095;</button>
                                     </div>
+
                                     <div class="calendar-weekdays">
-                                        <span>Su</span>
-                                        <span>Mo</span>
-                                        <span>Tu</span>
-                                        <span>We</span>
-                                        <span class="thursday-col">Th</span>
-                                        <span>Fr</span>
-                                        <span>Sa</span>
+                                        <span>Sun</span>
+                                        <span>Mon</span>
+                                        <span>Tue</span>
+                                        <span>Wed</span>
+                                        <span>Thu</span>
+                                        <span>Fri</span>
+                                        <span>Sat</span>
                                     </div>
-                                    <div class="calendar-days" id="calendarDays"></div>
-                                    <div class="calendar-footer-note">Closed on Thursdays</div>
+
+                                    <div id="calDaysGrid" class="calendar-days"></div>
+
+                                    <div class="calendar-footer">
+                                        <span>Thursdays are closed</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -176,13 +186,72 @@ $services = [
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container reveal">
+            <div class="footer-top">
+                <div class="footer-col">
+                    <h3>Get in Touch</h3>
+                    <div class="footer-content">
+                        <p>Have questions or ready to get started? Reach out to us. Your perfect smile is just a call away.</p>
+                        <a href="appointment.php" style="color: var(--primary, #0ea5e9); font-weight: 600; display: inline-block; margin-top: 12px;">Book an Appointment &rarr;</a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h3>Visit Us</h3>
+                    <div class="footer-content">
+                        <a href="https://www.google.com/maps/search/?api=1&query=0176+Manila+E+Rd+Binangonan+Rizal" target="_blank" rel="noopener noreferrer" class="contact-item">
+                            <span>📍</span>
+                            <span>0176 Manila E Rd, Binangonan, Rizal</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h3>Contact</h3>
+                    <div class="footer-content">
+                        <div class="footer-contact-links">
+                            <a href="tel:+639563708675" class="contact-item">
+                                <span>📞</span>
+                                <span>0956 370 8675</span>
+                            </a>
+                            <a href="mailto:cebanicodentalclinic@gmail.com" class="contact-item">
+                                <span>✉️</span>
+                                <span>cebanicodentalclinic@gmail.com</span>
+                            </a>
+                            <a href="https://www.facebook.com/cebanicodental" target="_blank" rel="noopener noreferrer" class="contact-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h7v-7h-2v-3h2V9.5C12 7.57 13.57 6 15.5 6H18v3h-2c-.55 0-1 .45-1 1v1h3v3h-3v7h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
+                                </svg>
+                                <span>Cebanico Dental</span>
+                            </a>
+                            <a href="https://www.instagram.com/cebanicodental" target="_blank" rel="noopener noreferrer" class="contact-item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                                </svg>
+                                <span>cebanicodental</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date("Y"); ?> Cebanico Dental Clinic. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
     <button id="backToTopBtn" aria-label="Back to Top" onclick="scrollToTop()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 15l-6-6-6 6"/>
         </svg>
     </button>
 
-    <script src="index.js?v=27"></script>
-    <script src="appointment.js?v=27"></script>
+    <script src="index.js?v=31"></script>
+    <script src="appointment.js?v=31"></script>
 </body>
 </html>
