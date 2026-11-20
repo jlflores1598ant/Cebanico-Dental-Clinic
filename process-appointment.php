@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 <<<<<<< HEAD
 function tableHasColumn(mysqli $conn, string $table, string $column): bool
-{
+{   
     $safeTable  = preg_replace("/[^a-zA-Z0-9_]/", "", $table);
     $safeColumn = $conn->real_escape_string($column);
     $res = $conn->query("SHOW COLUMNS FROM `{$safeTable}` LIKE '{$safeColumn}'");
