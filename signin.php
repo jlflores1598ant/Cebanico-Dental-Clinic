@@ -1,12 +1,220 @@
 <?php
 session_start();
 date_default_timezone_set("Asia/Manila");
+require_once "db_connect.php";
 
 // Dedicated Make.com webhook for sign-up / sign-in email verification
 $webhookUrl = "https://hook.us2.make.com/g4w8vvh2tkj72wj1e87qj7s98oeqsrfj";
 
 // Dynamic self-target so this works whether saved as signin.php or signup.php
 $currentPage = htmlspecialchars(basename($_SERVER["PHP_SELF"]));
+$isSignedIn  = isset($_SESSION["patient"]) && is_array($_SESSION["patient"]) && !empty($_SESSION["patient"]["email"]);
+
+function tableExists(mysqli $conn, string $table): bool
+{
+    $safeTable = $conn->real_escape_string(preg_replace("/[^a-zA-Z0-9_]/", "", $table));
+    $res = $conn->query("SHOW TABLES LIKE '{$safeTable}'");
+    if ($res instanceof mysqli_result) {
+        $exists = $res->num_rows > 0;
+        $res->free();
+        return $exists;
+    }
+    return false;
+}
+
+function ensurePatientsTable(mysqli $conn): bool
+{
+    if (tableExists($conn, "patients")) {
+        return true;
+    }
+    $sql = "CREATE TABLE IF NOT EXISTS `patients` (
+        `patient_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+        `username` varchar(100) NOT NULL,
+        `email` varchar(150) NOT NULL,
+        `contact_number` varchar(20) NOT NULL DEFAULT '',
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+        `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+        PRIMARY KEY (`patient_id`),
+        UNIQUE KEY `uq_patient_email` (`email`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+
+    return (bool)$conn->query($sql);
+}
+
+/**
+ * Looks up an existing registered patient record by email.
+ * Checks `patients` first, then falls back to `appointment_requests` so existing bookings are honored.
+ */
+function findRegisteredPatientByEmail(mysqli $conn, string $email): ?array
+{
+    $normalizedEmail = strtolower(trim($email));
+    if ($normalizedEmail === "") {
+        return null;
+    }
+
+    if (ensurePatientsTable($conn)) {
+        $stmt = $conn->prepare(
+            "SELECT username, email, contact_number
+             FROM patients
+             WHERE LOWER(email) = LOWER(?)
+             LIMIT 1"
+        );
+        if ($stmt) {
+            $stmt->bind_param("s", $normalizedEmail);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            $row = $res->fetch_assoc();
+            $stmt->close();
+            if ($row) {
+                return [
+                    "username"       => trim((string)$row["username"]),
+                    "email"          => strtolower(trim((string)$row["email"])),
+                    "contact_number" => trim((string)$row["contact_number"])
+                ];
+            }
+        }
+    }
+
+    if (tableExists($conn, "appointment_requests")) {
+        $reqStmt = $conn->prepare(
+            "SELECT full_name, email, contact_number
+             FROM appointment_requests
+             WHERE LOWER(email) = LOWER(?)
+             ORDER BY request_id ASC
+             LIMIT 1"
+        );
+        if ($reqStmt) {
+            $reqStmt->bind_param("s", $normalizedEmail);
+            $reqStmt->execute();
+            $res = $reqStmt->get_result();
+            $row = $res->fetch_assoc();
+            $reqStmt->close();
+            if ($row) {
+                $registeredName    = trim((string)$row["full_name"]);
+                $registeredContact = trim((string)$row["contact_number"]);
+
+                if (ensurePatientsTable($conn) && $registeredName !== "") {
+                    $ins = $conn->prepare(
+                        "INSERT IGNORE INTO patients (username, email, contact_number)
+                         VALUES (?, ?, ?)"
+                    );
+                    if ($ins) {
+                        $ins->bind_param("sss", $registeredName, $normalizedEmail, $registeredContact);
+                        $ins->execute();
+                        $ins->close();
+                    }
+                }
+
+                return [
+                    "username"       => $registeredName,
+                    "email"          => $normalizedEmail,
+                    "contact_number" => $registeredContact
+                ];
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Registers a new email + username binding once verified.
+ * Never overwrites an existing username for an already-registered email.
+ */
+function registerPatientIfNew(mysqli $conn, string $username, string $email, string $contact): array
+{
+    $normalizedEmail = strtolower(trim($email));
+    $cleanName       = preg_replace("/\s+/", " ", trim($username));
+    $cleanContact    = preg_replace("/[^0-9]/", "", trim($contact));
+
+    $existing = findRegisteredPatientByEmail($conn, $normalizedEmail);
+    if ($existing !== null) {
+        if (strcasecmp($existing["username"], $cleanName) !== 0) {
+            return [
+                "ok"      => false,
+                "error"   => "This email is already registered by a user, and the entered username does not match.",
+                "patient" => null
+            ];
+        }
+
+        if (ensurePatientsTable($conn) && $cleanContact !== "") {
+            $upd = $conn->prepare(
+                "UPDATE patients
+                 SET contact_number = ?
+                 WHERE LOWER(email) = LOWER(?)"
+            );
+            if ($upd) {
+                $upd->bind_param("ss", $cleanContact, $normalizedEmail);
+                $upd->execute();
+                $upd->close();
+            }
+        }
+
+        return [
+            "ok"      => true,
+            "error"   => "",
+            "patient" => [
+                "username"       => $existing["username"],
+                "email"          => $normalizedEmail,
+                "contact_number" => $cleanContact !== "" ? $cleanContact : $existing["contact_number"]
+            ]
+        ];
+    }
+
+    if (!ensurePatientsTable($conn)) {
+        return [
+            "ok"      => false,
+            "error"   => "Could not initialize patient account storage. Please try again.",
+            "patient" => null
+        ];
+    }
+
+    $ins = $conn->prepare(
+        "INSERT INTO patients (username, email, contact_number)
+         VALUES (?, ?, ?)"
+    );
+    if (!$ins) {
+        return [
+            "ok"      => false,
+            "error"   => "Database error while registering account: " . $conn->error,
+            "patient" => null
+        ];
+    }
+
+    $ins->bind_param("sss", $cleanName, $normalizedEmail, $cleanContact);
+    $executed = $ins->execute();
+    $errno    = $conn->errno;
+    $errMsg   = $ins->error;
+    $ins->close();
+
+    if (!$executed) {
+        if ($errno === 1062) {
+            $raceExisting = findRegisteredPatientByEmail($conn, $normalizedEmail);
+            if ($raceExisting !== null && strcasecmp($raceExisting["username"], $cleanName) !== 0) {
+                return [
+                    "ok"      => false,
+                    "error"   => "This email is already registered by a user, and the entered username does not match.",
+                    "patient" => null
+                ];
+            }
+        }
+        return [
+            "ok"      => false,
+            "error"   => "Could not save your account registration: " . $errMsg,
+            "patient" => null
+        ];
+    }
+
+    return [
+        "ok"      => true,
+        "error"   => "",
+        "patient" => [
+            "username"       => $cleanName,
+            "email"          => $normalizedEmail,
+            "contact_number" => $cleanContact
+        ]
+    ];
+}
 
 // Helper: Send 6-digit verification code through Make.com
 function sendEmailVerificationCode(string $webhookUrl, string $username, string $email, string $contact, string $otpCode): array
@@ -98,12 +306,42 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     }
 }
 
-$username   = trim($_POST["username"] ?? "");
+$username   = preg_replace("/\s+/", " ", trim($_POST["username"] ?? ""));
 $email      = strtolower(trim($_POST["email"] ?? ""));
 $contact    = trim($_POST["contactNumber"] ?? "");
 $errors     = [];
+$popupAlert = null;
 $infoNotice = "";
 $otpStep    = isset($_SESSION["pending_signup_otp"]) && is_array($_SESSION["pending_signup_otp"]);
+
+// Build map of registered email => username for instant pop-up feedback
+$registeredEmailMap = [];
+if (ensurePatientsTable($conn)) {
+    $mapRes = $conn->query("SELECT email, username FROM patients");
+    if ($mapRes instanceof mysqli_result) {
+        while ($mRow = $mapRes->fetch_assoc()) {
+            $k = strtolower(trim((string)$mRow["email"]));
+            $v = trim((string)$mRow["username"]);
+            if ($k !== "" && $v !== "") {
+                $registeredEmailMap[$k] = $v;
+            }
+        }
+        $mapRes->free();
+    }
+}
+if (tableExists($conn, "appointment_requests")) {
+    $reqMapRes = $conn->query("SELECT email, full_name FROM appointment_requests ORDER BY request_id ASC");
+    if ($reqMapRes instanceof mysqli_result) {
+        while ($rRow = $reqMapRes->fetch_assoc()) {
+            $k = strtolower(trim((string)$rRow["email"]));
+            $v = trim((string)$rRow["full_name"]);
+            if ($k !== "" && $v !== "" && !isset($registeredEmailMap[$k])) {
+                $registeredEmailMap[$k] = $v;
+            }
+        }
+        $reqMapRes->free();
+    }
+}
 
 // Disposable / temporary email providers
 $disposableDomains = [
@@ -171,7 +409,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
     // ==========================================================
-    // STEP 2: VERIFY 6-DIGIT CODE TO PROVE REAL EMAIL OWNERSHIP
+    // STEP 2: VERIFY 6-DIGIT CODE & LOCK ONE USERNAME PER EMAIL
     // ==========================================================
     elseif ($action === "verify_signup_otp" && isset($_SESSION["pending_signup_otp"])) {
         $otpStep  = true;
@@ -188,20 +426,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } elseif (!hash_equals((string)$pending["otp"], $otpInput)) {
             $errors[] = "Incorrect verification code. Please check your inbox and try again.";
         } else {
-            // Keep patient verified in the active PHP session without saving login credentials permanently
-            $_SESSION["patient"] = [
-                "username"       => $pending["username"],
-                "email"          => $pending["email"],
-                "contact_number" => $pending["contact"],
-                "verified_at"    => time()
-            ];
-            unset($_SESSION["pending_signup_otp"]);
-            header("Location: appointment.php");
-            exit;
+            $regResult = registerPatientIfNew(
+                $conn,
+                (string)$pending["username"],
+                (string)$pending["email"],
+                (string)$pending["contact"]
+            );
+
+            if (!$regResult["ok"] || !is_array($regResult["patient"])) {
+                unset($_SESSION["pending_signup_otp"]);
+                $otpStep    = false;
+                $email      = (string)$pending["email"];
+                $contact    = (string)$pending["contact"];
+                $username   = (string)$pending["username"];
+                $msg        = "This email is already registered by a user, and the entered username does not match.";
+                $errors[]   = $msg;
+                $popupAlert = ["title" => "Email Already Registered", "msg" => $msg, "target" => "username"];
+                $_SESSION["signin_form_time"] = time();
+            } else {
+                $_SESSION["patient"] = [
+                    "username"       => $regResult["patient"]["username"],
+                    "email"          => $regResult["patient"]["email"],
+                    "contact_number" => $regResult["patient"]["contact_number"],
+                    "verified_at"    => time()
+                ];
+                unset($_SESSION["pending_signup_otp"]);
+                header("Location: appointment.php");
+                exit;
+            }
         }
     }
     // ==========================================================
-    // STEP 1: VALIDATE INPUTS & TRIGGER MAKE.COM VERIFICATION HOOK
+    // STEP 1: VALIDATE INPUTS, CHECK REGISTERED NAME & SEND OTP
     // ==========================================================
     else {
         $otpStep    = false;
@@ -245,6 +501,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
+        // Check if this email already has a registered full name / username
+        $registeredPatient = empty($errors) ? findRegisteredPatientByEmail($conn, $email) : null;
+        if ($registeredPatient !== null && $registeredPatient["username"] !== "") {
+            if (strcasecmp($registeredPatient["username"], $username) !== 0) {
+                $mismatchMsg = "This email is already registered by a user, and the entered username does not match.";
+                $errors[]    = $mismatchMsg;
+                $popupAlert  = [
+                    "title"  => "Email Already Registered",
+                    "msg"    => $mismatchMsg,
+                    "target" => "username"
+                ];
+            }
+        }
+
         $contact = preg_replace("/[^0-9]/", "", $contact);
         if (!preg_match("/^09[0-9]{9}$/", $contact)) {
             $errors[] = "Please enter a valid 11-digit Philippine mobile number starting with 09.";
@@ -253,12 +523,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION["signin_form_time"] = time();
 
         if (empty($errors)) {
+            $effectiveName = ($registeredPatient !== null && $registeredPatient["username"] !== "")
+                ? $registeredPatient["username"]
+                : $username;
+
             $otpCode = (string)random_int(100000, 999999);
-            $sendRes = sendEmailVerificationCode($webhookUrl, $username, $email, $contact, $otpCode);
+            $sendRes = sendEmailVerificationCode($webhookUrl, $effectiveName, $email, $contact, $otpCode);
 
             if ($sendRes["success"]) {
                 $_SESSION["pending_signup_otp"] = [
-                    "username"   => $username,
+                    "username"   => $effectiveName,
                     "email"      => $email,
                     "contact"    => $contact,
                     "otp"        => $otpCode,
@@ -271,6 +545,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
     }
+}
+
+if (isset($conn) && $conn instanceof mysqli) {
+    $conn->close();
 }
 ?>
 <!DOCTYPE html>
@@ -291,8 +569,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=38">
-    <link rel="stylesheet" href="appointment.css?v=38">
+    <link rel="stylesheet" href="styles.css?v=40">
+    <link rel="stylesheet" href="appointment.css?v=40">
 </head>
 <body>
 
@@ -310,7 +588,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <li><a href="<?php echo $currentPage; ?>" class="nav-contact-btn active">Book Appointment</a></li>
                 </ul>
 
-                <a href="profile.php" class="nav-profile-btn" aria-label="My Profile" title="My Profile">
+                <a href="<?php echo $isSignedIn ? 'profile.php' : 'signin.php'; ?>"
+                   class="nav-profile-btn <?php echo $isSignedIn ? 'is-signed-in' : ''; ?>"
+                   aria-label="My Profile"
+                   title="My Profile">
                     <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
@@ -354,7 +635,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <p>Enter your details below so we can verify your email address before proceeding to the appointment booking page.</p>
 
                 <div class="appointment-hours-note">
-                    <p><strong>No Saved Login Details:</strong> For your privacy, we do not save or auto-fill your sign-in information.</p>
+                    <p><strong>One Name Per Email:</strong> Once an email is registered, your full name / username is tied to that email address.</p>
                     <p><strong>Email Verification Required:</strong> Every sign-in sends a 6-digit verification code to confirm your email is real and active.</p>
                 </div>
             </div>
@@ -377,7 +658,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             </div>
                         <?php } else { ?>
                             <div class="otp-notice-banner">
-                                We sent a 6-digit verification code to <strong><?php echo htmlspecialchars($_SESSION["pending_signup_otp"]["email"]); ?></strong>. Enter the code below to confirm your email address.
+                                We sent a 6-digit verification code to <strong><?php echo htmlspecialchars($_SESSION["pending_signup_otp"]["email"]); ?></strong> for <strong><?php echo htmlspecialchars($_SESSION["pending_signup_otp"]["username"]); ?></strong>. Enter the code below to confirm your email address.
                             </div>
                         <?php } ?>
 
@@ -545,9 +826,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </svg>
     </button>
 
-    <script src="index.js?v=38"></script>
+    <script src="index.js?v=40"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            const registeredEmails = <?php echo json_encode($registeredEmailMap, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+            const serverPopupAlert = <?php echo json_encode($popupAlert, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+
             const form = document.getElementById('signinForm');
             const usernameInput = document.getElementById('username');
             const emailInput = document.getElementById('email');
@@ -570,11 +854,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     targetEl.classList.remove('input-error');
                     void targetEl.offsetWidth;
                     targetEl.classList.add('input-error');
-                    setTimeout(() => targetEl.classList.remove('input-error'), 1500);
+                    setTimeout(() => targetEl.classList.remove('input-error'), 1800);
                 }
 
                 clearTimeout(popupTimeout);
-                popupTimeout = setTimeout(() => popup.classList.remove('show'), 4200);
+                popupTimeout = setTimeout(() => popup.classList.remove('show'), 4500);
             }
 
             if (closePopupBtn && popup) {
@@ -584,6 +868,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 });
             }
 
+            if (serverPopupAlert && serverPopupAlert.msg) {
+                const targetEl = serverPopupAlert.target === 'email'
+                    ? emailInput
+                    : (serverPopupAlert.target === 'contactNumber' ? contactNumberInput : usernameInput);
+                showRestrictionPopup(serverPopupAlert.msg, targetEl, serverPopupAlert.title || "Email Already Registered");
+            }
+
             if (signupOtpInput) {
                 signupOtpInput.addEventListener('input', function () {
                     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
@@ -591,6 +882,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
             if (!form) return;
+
+            function normalizeName(val) {
+                return val.replace(/\s+/g, ' ').trim().toLowerCase();
+            }
+
+            function checkRegisteredUsernameMismatch(triggerPopup = true) {
+                const emailKey = emailInput.value.trim().toLowerCase();
+                const enteredName = usernameInput.value.replace(/\s+/g, ' ').trim();
+                if (emailKey && Object.prototype.hasOwnProperty.call(registeredEmails, emailKey)) {
+                    const expectedName = String(registeredEmails[emailKey]).replace(/\s+/g, ' ').trim();
+                    if (enteredName !== "" && normalizeName(enteredName) !== normalizeName(expectedName)) {
+                        if (triggerPopup) {
+                            showRestrictionPopup(
+                                "This email is already registered by a user, and the entered username does not match.",
+                                usernameInput,
+                                "Email Already Registered"
+                            );
+                        }
+                        return { mismatch: true };
+                    }
+                }
+                return { mismatch: false };
+            }
 
             const blockedDomains = [
                 "mailinator.com", "guerrillamail.com", "tempmail.com", "temp-mail.org",
@@ -668,6 +982,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     showRestrictionPopup("Special characters are not allowed in your name.", this, "Name Restriction");
                 }
                 this.value = raw.replace(/[^A-Za-z\s]/g, '');
+                checkRegisteredUsernameMismatch(true);
             });
 
             emailInput.addEventListener('input', function () {
@@ -678,7 +993,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     showRestrictionPopup("Invalid character detected in email field.", this, "Email Restriction");
                 }
                 this.value = raw.replace(/[^A-Za-z0-9@_.-]/g, '');
+                checkRegisteredUsernameMismatch(true);
             });
+
+            emailInput.addEventListener('change', () => checkRegisteredUsernameMismatch(true));
+            usernameInput.addEventListener('change', () => checkRegisteredUsernameMismatch(true));
 
             contactNumberInput.addEventListener('input', function () {
                 const raw = this.value;
@@ -719,6 +1038,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     e.preventDefault();
                     emailInput.focus();
                     showRestrictionPopup(emailCheck.msg, emailInput, emailCheck.title);
+                    return;
+                }
+
+                const mismatchCheck = checkRegisteredUsernameMismatch(false);
+                if (mismatchCheck.mismatch) {
+                    e.preventDefault();
+                    usernameInput.focus();
+                    showRestrictionPopup(
+                        "This email is already registered by a user, and the entered username does not match.",
+                        usernameInput,
+                        "Email Already Registered"
+                    );
                     return;
                 }
 

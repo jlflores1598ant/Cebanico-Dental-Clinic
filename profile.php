@@ -33,6 +33,25 @@ function tableExists(mysqli $conn, string $table): bool
     return false;
 }
 
+function ensurePatientsTable(mysqli $conn): bool
+{
+    if (tableExists($conn, "patients")) {
+        return true;
+    }
+    $sql = "CREATE TABLE IF NOT EXISTS `patients` (
+        `patient_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+        `username` varchar(100) NOT NULL,
+        `email` varchar(150) NOT NULL,
+        `contact_number` varchar(20) NOT NULL DEFAULT '',
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+        `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+        PRIMARY KEY (`patient_id`),
+        UNIQUE KEY `uq_patient_email` (`email`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+
+    return (bool)$conn->query($sql);
+}
+
 function tableHasColumn(mysqli $conn, string $table, string $column): bool
 {
     $safeTable  = preg_replace("/[^a-zA-Z0-9_]/", "", $table);
@@ -51,15 +70,15 @@ $patientEmail   = strtolower(trim((string)($patientSession["email"] ?? "")));
 $patientName    = trim((string)($patientSession["username"] ?? ""));
 $patientContact = trim((string)($patientSession["contact_number"] ?? ""));
 
-// Sync saved patient record if present
-if (tableExists($conn, "patients")) {
+// Load registered name & contact from `patients`
+if (ensurePatientsTable($conn)) {
     $pStmt = $conn->prepare("SELECT username, contact_number FROM patients WHERE LOWER(email) = LOWER(?) LIMIT 1");
     if ($pStmt) {
         $pStmt->bind_param("s", $patientEmail);
         $pStmt->execute();
         $pRes = $pStmt->get_result();
         if ($pRow = $pRes->fetch_assoc()) {
-            if ($patientName === "" && !empty($pRow["username"])) {
+            if (!empty($pRow["username"])) {
                 $patientName = trim((string)$pRow["username"]);
                 $_SESSION["patient"]["username"] = $patientName;
             }
@@ -72,43 +91,61 @@ if (tableExists($conn, "patients")) {
     }
 }
 
+// Fallback to earliest appointment_requests record if `patients` has no row yet
+if ($patientName === "" && tableExists($conn, "appointment_requests")) {
+    $rStmt = $conn->prepare("SELECT full_name, contact_number FROM appointment_requests WHERE LOWER(email) = LOWER(?) ORDER BY request_id ASC LIMIT 1");
+    if ($rStmt) {
+        $rStmt->bind_param("s", $patientEmail);
+        $rStmt->execute();
+        $rRes = $rStmt->get_result();
+        if ($rRow = $rRes->fetch_assoc()) {
+            if (!empty($rRow["full_name"])) {
+                $patientName = trim((string)$rRow["full_name"]);
+                $_SESSION["patient"]["username"] = $patientName;
+            }
+            if ($patientContact === "" && !empty($rRow["contact_number"])) {
+                $patientContact = trim((string)$rRow["contact_number"]);
+                $_SESSION["patient"]["contact_number"] = $patientContact;
+            }
+        }
+        $rStmt->close();
+    }
+}
+
 $successMsg = "";
 $errorMsg   = "";
 
-// Handle Edit Profile Information
+// Handle Full Name / Username & Contact Number Update (Only available while signed in)
 if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "update_profile") {
-    $newName    = trim($_POST["username"] ?? "");
+    $newName    = preg_replace("/\s+/", " ", trim($_POST["username"] ?? ""));
     $newContact = preg_replace("/[^0-9]/", "", trim($_POST["contact_number"] ?? ""));
 
-    $validationErrors = [];
-
     if ($newName === "" || !preg_match("/^[A-Za-z\s]{2,}$/", $newName)) {
-        $validationErrors[] = "Please enter a valid full name / username (letters and spaces only, at least 2 characters).";
-    }
-
-    if (!preg_match("/^09[0-9]{9}$/", $newContact)) {
-        $validationErrors[] = "Please enter a valid 11-digit Philippine mobile number starting with 09.";
-    }
-
-    if (!empty($validationErrors)) {
-        $errorMsg = implode(" ", $validationErrors);
+        $errorMsg = "Please enter a valid full name / username (letters and spaces only, at least 2 characters).";
+    } elseif (!preg_match("/^09[0-9]{9}$/", $newContact)) {
+        $errorMsg = "Please enter a valid 11-digit Philippine mobile number starting with 09.";
     } else {
-        $_SESSION["patient"]["username"]       = $newName;
-        $_SESSION["patient"]["contact_number"] = $newContact;
-        $patientName                           = $newName;
-        $patientContact                        = $newContact;
+        $dbSaved = true;
 
-        if (tableExists($conn, "patients")) {
+        if (ensurePatientsTable($conn)) {
             $upsertStmt = $conn->prepare(
                 "INSERT INTO patients (username, email, contact_number)
                  VALUES (?, ?, ?)
-                 ON DUPLICATE KEY UPDATE username = VALUES(username), contact_number = VALUES(contact_number)"
+                 ON DUPLICATE KEY UPDATE
+                    username = VALUES(username),
+                    contact_number = VALUES(contact_number)"
             );
             if ($upsertStmt) {
                 $upsertStmt->bind_param("sss", $newName, $patientEmail, $newContact);
-                $upsertStmt->execute();
+                if (!$upsertStmt->execute()) {
+                    $dbSaved = false;
+                }
                 $upsertStmt->close();
+            } else {
+                $dbSaved = false;
             }
+        } else {
+            $dbSaved = false;
         }
 
         if (tableExists($conn, "appointment_requests")) {
@@ -124,21 +161,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "updat
             }
         }
 
-        if (tableExists($conn, "appointments") && tableHasColumn($conn, "appointments", "full_name")) {
-            $updAppt = $conn->prepare(
-                "UPDATE appointments a
-                 INNER JOIN appointment_requests r ON a.request_id = r.request_id
-                 SET a.full_name = ?
-                 WHERE LOWER(r.email) = LOWER(?) AND a.status IN ('Pending', 'Confirmed')"
-            );
-            if ($updAppt) {
-                $updAppt->bind_param("ss", $newName, $patientEmail);
-                $updAppt->execute();
-                $updAppt->close();
-            }
+        if ($dbSaved) {
+            $_SESSION["patient"]["username"]       = $newName;
+            $_SESSION["patient"]["contact_number"] = $newContact;
+            $patientName                           = $newName;
+            $patientContact                        = $newContact;
+            $successMsg                            = "Your profile details have been updated and saved.";
+        } else {
+            $errorMsg = "Could not save your profile updates to the database. Please try again.";
         }
-
-        $successMsg = "Your profile information has been updated.";
     }
 }
 
@@ -190,8 +221,8 @@ if (isset($conn) && $conn instanceof mysqli) {
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <link rel="stylesheet" href="styles.css?v=39">
-    <link rel="stylesheet" href="appointment.css?v=39">
+    <link rel="stylesheet" href="styles.css?v=40">
+    <link rel="stylesheet" href="appointment.css?v=40">
     <style>
         .profile-template-box {
             background: rgba(15, 23, 42, 0.72);
@@ -281,6 +312,47 @@ if (isset($conn) && $conn instanceof mysqli) {
             color: #ffffff;
             display: block;
         }
+        .editable-field-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .editable-field-header label {
+            margin-bottom: 0 !important;
+        }
+        .edit-name-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.14);
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            color: #38bdf8;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .edit-name-toggle-btn:hover,
+        .edit-name-toggle-btn.is-editing {
+            background: rgba(56, 189, 248, 0.25);
+            border-color: #38bdf8;
+            color: #ffffff;
+        }
+        .locked-field-input {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+        .locked-field-hint {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            display: block;
+        }
         .btn-logout-outline {
             width: 100%;
             display: inline-flex;
@@ -321,7 +393,10 @@ if (isset($conn) && $conn instanceof mysqli) {
                     <li><a href="appointment.php" class="nav-contact-btn">Book Appointment</a></li>
                 </ul>
 
-                <a href="profile.php" aria-label="My Profile" title="My Profile" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;color:#38bdf8;background:rgba(14,165,233,0.16);border:1px solid rgba(56,189,248,0.7);text-decoration:none;flex-shrink:0;">
+                <a href="profile.php"
+                   class="nav-profile-btn active is-signed-in"
+                   aria-label="My Profile"
+                   title="My Profile">
                     <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
@@ -416,7 +491,7 @@ if (isset($conn) && $conn instanceof mysqli) {
                 <?php } ?>
             </div>
 
-            <!-- Right Column: Edit Information & Log Out -->
+            <!-- Right Column: Edit Full Name / Username, Contact Number & Log Out -->
             <div class="appointment-form-wrapper">
                 <div class="appointment-form glass-card">
 
@@ -436,15 +511,23 @@ if (isset($conn) && $conn instanceof mysqli) {
                         <input type="hidden" name="action" value="update_profile">
 
                         <div class="form-group">
-                            <label for="username">Full Name / Username</label>
+                            <div class="editable-field-header">
+                                <label for="username">Full Name / Username</label>
+                                <button type="button" id="toggleEditNameBtn" class="edit-name-toggle-btn" aria-pressed="false">
+                                    &#9998; Edit Name
+                                </button>
+                            </div>
                             <input
                                 type="text"
                                 id="username"
                                 name="username"
+                                class="locked-field-input"
                                 placeholder="Juan Dela Cruz"
                                 value="<?php echo htmlspecialchars($patientName); ?>"
+                                readonly
                                 required
                             >
+                            <span id="usernameFieldHint" class="locked-field-hint">Click "Edit Name" to update your saved full name / username.</span>
                         </div>
 
                         <div class="form-group">
@@ -453,8 +536,10 @@ if (isset($conn) && $conn instanceof mysqli) {
                                 type="email"
                                 id="email"
                                 name="email"
+                                class="locked-field-input"
                                 value="<?php echo htmlspecialchars($patientEmail); ?>"
                                 readonly
+                                aria-readonly="true"
                             >
                         </div>
 
@@ -564,11 +649,13 @@ if (isset($conn) && $conn instanceof mysqli) {
         </svg>
     </button>
 
-    <script src="index.js?v=39"></script>
+    <script src="index.js?v=40"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById('editProfileForm');
             const usernameInput = document.getElementById('username');
+            const toggleEditNameBtn = document.getElementById('toggleEditNameBtn');
+            const usernameFieldHint = document.getElementById('usernameFieldHint');
             const contactInput = document.getElementById('contact_number');
 
             const popup = document.getElementById('restrictionPopup');
@@ -601,8 +688,36 @@ if (isset($conn) && $conn instanceof mysqli) {
                 });
             }
 
-            if (usernameInput) {
+            if (toggleEditNameBtn && usernameInput) {
+                const originalName = usernameInput.value;
+                toggleEditNameBtn.addEventListener('click', () => {
+                    const isCurrentlyLocked = usernameInput.hasAttribute('readonly');
+                    if (isCurrentlyLocked) {
+                        usernameInput.removeAttribute('readonly');
+                        usernameInput.classList.remove('locked-field-input');
+                        toggleEditNameBtn.classList.add('is-editing');
+                        toggleEditNameBtn.setAttribute('aria-pressed', 'true');
+                        toggleEditNameBtn.textContent = 'Cancel Edit';
+                        if (usernameFieldHint) {
+                            usernameFieldHint.textContent = 'Enter your updated full name / username and click "Save Profile Changes".';
+                        }
+                        usernameInput.focus();
+                        usernameInput.setSelectionRange(usernameInput.value.length, usernameInput.value.length);
+                    } else {
+                        usernameInput.value = originalName;
+                        usernameInput.setAttribute('readonly', 'readonly');
+                        usernameInput.classList.add('locked-field-input');
+                        toggleEditNameBtn.classList.remove('is-editing');
+                        toggleEditNameBtn.setAttribute('aria-pressed', 'false');
+                        toggleEditNameBtn.innerHTML = '&#9998; Edit Name';
+                        if (usernameFieldHint) {
+                            usernameFieldHint.textContent = 'Click "Edit Name" to update your saved full name / username.';
+                        }
+                    }
+                });
+
                 usernameInput.addEventListener('input', function () {
+                    if (this.hasAttribute('readonly')) return;
                     const raw = this.value;
                     if (/[0-9]/.test(raw)) {
                         showRestrictionPopup("Numbers are not allowed in your name.", this, "Name Restriction");
@@ -635,12 +750,16 @@ if (isset($conn) && $conn instanceof mysqli) {
 
             if (form) {
                 form.addEventListener('submit', (e) => {
-                    if (usernameInput.value.trim().length < 2) {
+                    const cleanName = usernameInput.value.replace(/\s+/g, ' ').trim();
+                    if (cleanName.length < 2 || !/^[A-Za-z\s]{2,}$/.test(cleanName)) {
                         e.preventDefault();
+                        usernameInput.removeAttribute('readonly');
+                        usernameInput.classList.remove('locked-field-input');
                         usernameInput.focus();
-                        showRestrictionPopup("Please enter a valid full name / username.", usernameInput, "Name Required");
+                        showRestrictionPopup("Please enter a valid full name / username (letters and spaces only, at least 2 characters).", usernameInput, "Invalid Name");
                         return;
                     }
+
                     if (!/^09[0-9]{9}$/.test(contactInput.value)) {
                         e.preventDefault();
                         contactInput.focus();
